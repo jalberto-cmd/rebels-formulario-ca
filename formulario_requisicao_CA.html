@@ -6,195 +6,59 @@
 <title>Requisição de Lançamento — Rebels</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: Arial, sans-serif;
-  font-size: 12px;
-  color: #222;
-  background: #f0f2f5;
-  padding: 24px 16px;
-}
-.doc {
-  max-width: 820px;
-  margin: 0 auto;
-  background: #fff;
-  padding: 24px 28px 32px;
-  border: 1px solid #ccc;
-}
-
-/* ── Cabeçalho ── */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  border-bottom: 3px solid #2E5FA3;
-  padding-bottom: 12px;
-  margin-bottom: 16px;
-}
+body { font-family: Arial, sans-serif; font-size: 12px; color: #222; background: #f0f2f5; padding: 24px 16px; }
+.doc { max-width: 820px; margin: 0 auto; background: #fff; padding: 24px 28px 32px; border: 1px solid #ccc; }
+.header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #2E5FA3; padding-bottom: 12px; margin-bottom: 16px; }
 .header-left h1 { font-size: 20px; color: #1F3864; font-weight: bold; }
 .header-left p  { color: #595959; font-size: 10px; margin-top: 3px; }
 .header-right { text-align: right; }
-.id-box {
-  background: #1F3864; color: #fff;
-  padding: 5px 14px; border-radius: 4px;
-  font-size: 12px; font-weight: bold; letter-spacing: 1px;
-  display: inline-block; margin-bottom: 4px;
-}
+.id-box { background: #1F3864; color: #fff; padding: 5px 14px; border-radius: 4px; font-size: 12px; font-weight: bold; letter-spacing: 1px; display: inline-block; margin-bottom: 4px; }
 .header-right .meta { font-size: 10px; color: #595959; }
-
-/* ── Seções ── */
 .section { margin-bottom: 14px; }
-.section-title {
-  background: #2E5FA3; color: #fff;
-  font-size: 10px; font-weight: bold; text-transform: uppercase;
-  letter-spacing: 0.8px; padding: 4px 10px; margin-bottom: 0;
-}
-
-/* ── Tabela de campos ── */
+.section-title { background: #2E5FA3; color: #fff; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.8px; padding: 4px 10px; margin-bottom: 0; }
 table.fields { width: 100%; border-collapse: collapse; }
-table.fields td {
-  padding: 5px 8px;
-  border: 1px solid #CCCCCC;
-  vertical-align: middle;
-  font-size: 11px;
-}
-table.fields td.lbl {
-  background: #DEEAF1; color: #1F3864; font-weight: bold;
-  font-size: 10px; white-space: nowrap; width: 18%;
-}
+table.fields td { padding: 5px 8px; border: 1px solid #CCCCCC; vertical-align: middle; font-size: 11px; }
+table.fields td.lbl { background: #DEEAF1; color: #1F3864; font-weight: bold; font-size: 10px; white-space: nowrap; width: 18%; }
 table.fields td.lbl .req { color: #C00000; }
 #tbl-lancamento { table-layout: fixed; }
 table.fields tr:nth-child(even) td.val { background: #F9F9F9; }
 table.fields td.val { background: #fff; }
 table.fields td.readonly { background: #F2F2F2; color: #555; }
-
-/* ── Inputs ── */
-input[type=text], input[type=number], input[type=date],
-select, textarea {
-  width: 100%;
-  border: 1px solid #BBBBBB;
-  border-radius: 3px;
-  padding: 4px 7px;
-  font-size: 11px;
-  font-family: Arial, sans-serif;
-  color: #222;
-  background: #fff;
-}
-input[type=text]:focus, input[type=number]:focus,
-input[type=date]:focus, select:focus, textarea:focus {
-  outline: none;
-  border-color: #2E5FA3;
-  box-shadow: 0 0 0 2px rgba(46,95,163,0.15);
-}
-input.readonly-input, select:disabled {
-  background: #F2F2F2;
-  color: #555;
-  cursor: default;
-}
+input[type=text], input[type=number], input[type=date], select, textarea { width: 100%; border: 1px solid #BBBBBB; border-radius: 3px; padding: 4px 7px; font-size: 11px; font-family: Arial, sans-serif; color: #222; background: #fff; }
+input[type=text]:focus, input[type=number]:focus, input[type=date]:focus, select:focus, textarea:focus { outline: none; border-color: #2E5FA3; box-shadow: 0 0 0 2px rgba(46,95,163,0.15); }
+input.readonly-input, select:disabled { background: #F2F2F2; color: #555; cursor: default; }
 textarea { resize: vertical; min-height: 54px; }
-
-/* ── CNPJ lookup ── */
 .cnpj-row { display: flex; gap: 6px; align-items: center; }
 .cnpj-row input { flex: 1; }
-.cnpj-status {
-  font-size: 12px; color: #666; font-style: italic;
-  min-height: 18px; margin-top: 3px;
-}
-.btn-lookup {
-  display: none;
-  background: #2E5FA3; color: #fff;
-  border: none; border-radius: 3px;
-  padding: 5px 12px; font-size: 10px; font-weight: bold;
-  cursor: pointer; white-space: nowrap;
-}
+.cnpj-status { font-size: 12px; color: #666; font-style: italic; min-height: 18px; margin-top: 3px; }
+.btn-lookup { display: none; background: #2E5FA3; color: #fff; border: none; border-radius: 3px; padding: 5px 12px; font-size: 10px; font-weight: bold; cursor: pointer; white-space: nowrap; }
 .btn-lookup:hover { background: #1F3864; }
-
-/* ── Valores ── */
-.valores-row { display: flex; gap: 0; }
-.valor-box {
-  flex: 1; border: 1px solid #CCCCCC;
-  padding: 8px 12px;
-}
-.valor-box:not(:last-child) { border-right: none; }
-.valor-box .vb-label {
-  font-size: 9px; font-weight: bold; color: #595959;
-  text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;
-}
-.valor-box.bruto  { background: #F9F9F9; }
-.valor-box.liquido { background: #DEEAF1; }
-
-/* ── Impostos ── */
 table.impostos { width: 100%; border-collapse: collapse; }
-table.impostos td {
-  border: 1px solid #CCCCCC; padding: 6px 8px;
-  vertical-align: top;
-}
-table.impostos td .imp-label {
-  font-size: 9px; font-weight: bold; color: #C55A11;
-  text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 3px;
-}
+table.impostos td { border: 1px solid #CCCCCC; padding: 6px 8px; vertical-align: top; }
+table.impostos td .imp-label { font-size: 9px; font-weight: bold; color: #C55A11; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 3px; }
 table.impostos tr:first-child td { background: #FFF8F0; }
 table.impostos tr:last-child  td { background: #FFF2CC; }
-
-/* ── Parcelas ── */
 #sec-parcelamento { display: none; }
 table.parcelas { width: 100%; border-collapse: collapse; }
-table.parcelas th {
-  background: #BDD7EE; color: #1F3864; font-size: 10px;
-  font-weight: bold; padding: 4px 8px; border: 1px solid #AAAAAA; text-align: center;
-}
-table.parcelas td {
-  padding: 4px 8px; border: 1px solid #CCCCCC; text-align: center; font-size: 11px;
-}
+table.parcelas th { background: #BDD7EE; color: #1F3864; font-size: 10px; font-weight: bold; padding: 4px 8px; border: 1px solid #AAAAAA; text-align: center; }
+table.parcelas td { padding: 4px 8px; border: 1px solid #CCCCCC; text-align: center; font-size: 11px; }
 table.parcelas td.num { background: #F2F2F2; font-weight: bold; color: #1F3864; width: 40px; }
 .parc-row { display: none; }
 .parc-row.visible { display: table-row; }
-
-/* ── Aprovação (readonly) ── */
 #sec-aprovacao { display: none; }
-
-/* ── Botão enviar ── */
-.submit-bar {
-  margin-top: 20px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  align-items: center;
-}
-.btn-submit {
-  background: #1F3864; color: #fff;
-  border: none; border-radius: 4px;
-  padding: 10px 28px; font-size: 13px; font-weight: bold;
-  cursor: pointer; letter-spacing: 0.5px;
-}
+.submit-bar { margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; align-items: center; }
+.btn-submit { background: #1F3864; color: #fff; border: none; border-radius: 4px; padding: 10px 28px; font-size: 13px; font-weight: bold; cursor: pointer; letter-spacing: 0.5px; }
 .btn-submit:hover { background: #2E5FA3; }
-.btn-reset {
-  background: #fff; color: #555;
-  border: 1px solid #BBBBBB; border-radius: 4px;
-  padding: 10px 18px; font-size: 12px;
-  cursor: pointer;
-}
+.btn-reset { background: #fff; color: #555; border: 1px solid #BBBBBB; border-radius: 4px; padding: 10px 18px; font-size: 12px; cursor: pointer; }
 .btn-reset:hover { background: #F2F2F2; }
-
-/* ── Mensagens ── */
-.msg-success {
-  background: #E2EFDA; border: 1px solid #375623; border-radius: 4px;
-  padding: 10px 16px; color: #375623; font-weight: bold; font-size: 12px;
-  display: none; margin-top: 12px;
-}
-.msg-error {
-  background: #FCE4D6; border: 1px solid #C00000; border-radius: 4px;
-  padding: 10px 16px; color: #C00000; font-weight: bold; font-size: 12px;
-  display: none; margin-top: 12px;
-}
+.msg-success { background: #E2EFDA; border: 1px solid #375623; border-radius: 4px; padding: 10px 16px; color: #375623; font-weight: bold; font-size: 12px; display: none; margin-top: 12px; }
+.msg-error { background: #FCE4D6; border: 1px solid #C00000; border-radius: 4px; padding: 10px 16px; color: #C00000; font-weight: bold; font-size: 12px; display: none; margin-top: 12px; }
 .field-error { border-color: #C00000 !important; }
 .error-text { color: #C00000; font-size: 10px; margin-top: 2px; }
 </style>
 </head>
 <body>
-
 <div class="doc">
-
-  <!-- ══ CABEÇALHO ══════════════════════════════════════════════ -->
   <div class="header">
     <div class="header-left">
       <h1>Rebels — Manual de Donos</h1>
@@ -205,10 +69,7 @@ table.parcelas td.num { background: #F2F2F2; font-weight: bold; color: #1F3864; 
       <div class="meta" id="display-data">—</div>
     </div>
   </div>
-
   <form id="form-req" novalidate>
-
-    <!-- ══ 1. IDENTIFICAÇÃO DA REQUISIÇÃO ═════════════════════ -->
     <div class="section">
       <div class="section-title">1. Identificação da Requisição</div>
       <table class="fields">
@@ -243,8 +104,6 @@ table.parcelas td.num { background: #F2F2F2; font-weight: bold; color: #1F3864; 
         </tr>
       </table>
     </div>
-
-    <!-- ══ 2. FORNECEDOR / CLIENTE ════════════════════════════ -->
     <div class="section">
       <div class="section-title">2. Fornecedor / Cliente</div>
       <table class="fields">
@@ -274,8 +133,6 @@ table.parcelas td.num { background: #F2F2F2; font-weight: bold; color: #1F3864; 
         </tr>
       </table>
     </div>
-
-    <!-- ══ 3. DADOS DO LANÇAMENTO ══════════════════════════════ -->
     <div class="section">
       <div class="section-title">3. Dados do Lançamento</div>
       <table class="fields" id="tbl-lancamento">
@@ -356,18 +213,13 @@ table.parcelas td.num { background: #F2F2F2; font-weight: bold; color: #1F3864; 
         </tr>
       </table>
     </div>
-
-    <!-- ══ 4. PARCELAMENTO (condicional) ══════════════════════ -->
     <div class="section" id="sec-parcelamento">
       <div class="section-title">4. Parcelamento</div>
       <table class="parcelas">
         <tr>
-          <th style="width:40px">Parc.</th>
-          <th>Vencimento</th>
-          <th style="width:40px">Parc.</th>
-          <th>Vencimento</th>
-          <th style="width:40px">Parc.</th>
-          <th>Vencimento</th>
+          <th style="width:40px">Parc.</th><th>Vencimento</th>
+          <th style="width:40px">Parc.</th><th>Vencimento</th>
+          <th style="width:40px">Parc.</th><th>Vencimento</th>
         </tr>
         <tr class="parc-row visible" id="pr-1-3">
           <td class="num">1ª</td><td><input type="date" id="Venc_Parcela_1"></td>
@@ -392,63 +244,29 @@ table.parcelas td.num { background: #F2F2F2; font-weight: bold; color: #1F3864; 
       </table>
       <p style="font-size:10px;color:#888;margin-top:4px;padding-left:4px;">Preencha apenas as parcelas utilizadas.</p>
     </div>
-
-    <!-- ══ 5. RETENÇÕES E IMPOSTOS ════════════════════════════ -->
     <div class="section">
       <div class="section-title">5. Retenções e Impostos</div>
       <table class="impostos">
         <tr>
-          <td>
-            <div class="imp-label">ISS (R$)</div>
-            <input type="number" id="ISS" step="0.01" min="0" value="0" placeholder="0,00">
-          </td>
-          <td>
-            <div class="imp-label">PIS (R$)</div>
-            <input type="number" id="PIS" step="0.01" min="0" value="0" placeholder="0,00">
-          </td>
-          <td>
-            <div class="imp-label">COFINS (R$)</div>
-            <input type="number" id="COFINS" step="0.01" min="0" value="0" placeholder="0,00">
-          </td>
-          <td>
-            <div class="imp-label">CSLL (R$)</div>
-            <input type="number" id="CSLL" step="0.01" min="0" value="0" placeholder="0,00">
-          </td>
+          <td><div class="imp-label">ISS (R$)</div><input type="number" id="ISS" step="0.01" min="0" value="0" placeholder="0,00"></td>
+          <td><div class="imp-label">PIS (R$)</div><input type="number" id="PIS" step="0.01" min="0" value="0" placeholder="0,00"></td>
+          <td><div class="imp-label">COFINS (R$)</div><input type="number" id="COFINS" step="0.01" min="0" value="0" placeholder="0,00"></td>
+          <td><div class="imp-label">CSLL (R$)</div><input type="number" id="CSLL" step="0.01" min="0" value="0" placeholder="0,00"></td>
         </tr>
         <tr>
-          <td>
-            <div class="imp-label">IRPJ (R$)</div>
-            <input type="number" id="IRPJ" step="0.01" min="0" value="0" placeholder="0,00">
-          </td>
-          <td>
-            <div class="imp-label">INSS (R$)</div>
-            <input type="number" id="INSS" step="0.01" min="0" value="0" placeholder="0,00">
-          </td>
-          <td>
-            <div class="imp-label">Outros (R$)</div>
-            <input type="number" id="Outros" step="0.01" min="0" value="0" placeholder="0,00">
-          </td>
-          <td style="background:#fff3e0;">
-            <div class="imp-label" style="color:#1F3864;">Total Impostos (R$)</div>
-            <input type="text" id="Total_Impostos" class="readonly-input" readonly value="0,00">
-          </td>
+          <td><div class="imp-label">IRPJ (R$)</div><input type="number" id="IRPJ" step="0.01" min="0" value="0" placeholder="0,00"></td>
+          <td><div class="imp-label">INSS (R$)</div><input type="number" id="INSS" step="0.01" min="0" value="0" placeholder="0,00"></td>
+          <td><div class="imp-label">Outros (R$)</div><input type="number" id="Outros" step="0.01" min="0" value="0" placeholder="0,00"></td>
+          <td style="background:#fff3e0;"><div class="imp-label" style="color:#1F3864;">Total Impostos (R$)</div><input type="text" id="Total_Impostos" class="readonly-input" readonly value="0,00"></td>
         </tr>
       </table>
     </div>
-
-    <!-- ══ 6. OBSERVAÇÕES ══════════════════════════════════════ -->
     <div class="section">
       <div class="section-title">6. Observações</div>
       <table class="fields">
-        <tr>
-          <td class="val" style="padding:8px;">
-            <textarea id="Observacoes" placeholder="Informações adicionais relevantes para aprovação..."></textarea>
-          </td>
-        </tr>
+        <tr><td class="val" style="padding:8px;"><textarea id="Observacoes" placeholder="Informações adicionais relevantes para aprovação..."></textarea></td></tr>
       </table>
     </div>
-
-    <!-- ══ 7. APROVAÇÃO (readonly — preenchido pelo aprovador) ══ -->
     <div class="section" id="sec-aprovacao">
       <div class="section-title">7. Aprovação</div>
       <table class="fields">
@@ -466,30 +284,18 @@ table.parcelas td.num { background: #F2F2F2; font-weight: bold; color: #1F3864; 
         </tr>
       </table>
     </div>
-
-    <!-- ══ ENVIO ═══════════════════════════════════════════════ -->
     <div class="submit-bar">
       <button type="button" class="btn-reset" onclick="resetForm()">Limpar</button>
       <button type="submit" class="btn-submit">Enviar Requisição →</button>
     </div>
-
-    <div class="msg-success" id="msg-success">
-      ✅ Requisição enviada com sucesso! O aprovador será notificado por e-mail.
-    </div>
-    <div class="msg-error" id="msg-error">
-      ❌ <span id="msg-error-text">Erro ao enviar. Verifique os campos e tente novamente.</span>
-    </div>
-
+    <div class="msg-success" id="msg-success">✅ Requisição enviada com sucesso! O aprovador será notificado por e-mail.</div>
+    <div class="msg-error" id="msg-error">❌ <span id="msg-error-text">Erro ao enviar. Verifique os campos e tente novamente.</span></div>
   </form>
 </div>
-
 <script>
-// ══ CONFIGURAÇÃO ══════════════════════════════════════════════
 const MAKE_WEBHOOK_URL   = 'https://hook.us2.make.com/1nlkcr3x6ocubf0mtycachgg3gtehhw1';
 const MAKE_LOOKUP_URL    = 'https://hook.us2.make.com/rlcy9909pw828x4yrjcmguicquq69x57';
 const MAKE_BU_LOOKUP_URL = 'https://hook.us2.make.com/orc45we6wjth7itme75feu1tti2ra99b';
-
-// ══ DADOS ════════════════════════════════════════════════════
 const REQUERENTES = {
   'Corporativo': [{ nome: 'José Alberto', email: 'jalberto@rebels.cc' }],
   'Ventures':    [{ nome: 'Claudia',      email: 'claudia@rebels.cc' }],
@@ -497,7 +303,6 @@ const REQUERENTES = {
   'MdD':         [{ nome: 'Amaral',       email: 'amaral@rebels.cc' }],
   'WBC':         [{ nome: 'Gustavo',      email: 'gustavo@rebels.cc' }]
 };
-
 const APROVADORES = {
   'Corporativo': { nome: 'José Alberto', email: 'jalbertosilva@gmail.com' },
   'Ventures':    { nome: 'Jayme',        email: 'jayme@rebels.cc' },
@@ -505,20 +310,15 @@ const APROVADORES = {
   'MdD':         { nome: 'Bechi',        email: 'bechi@rebels.cc' },
   'WBC':         { nome: 'Thiago',       email: 'thiago@rebels.cc' }
 };
-
-// ══ ESTADO DO FORNECEDOR ══════════════════════════════════════
 let fornecedorStatus = 'pendente';
 let salvarFornecedor = false;
 let _buscaId = 0;
-
 function setFornecedorStatus(status, msg, color) {
   fornecedorStatus = status;
   const el = document.getElementById('cnpj_status');
   el.textContent = msg;
   el.style.color = color || '#666';
 }
-
-// ══ INICIALIZAÇÃO ════════════════════════════════════════════
 function init() {
   const now = new Date();
   const id = 'REQ-' + now.getFullYear().toString() +
@@ -527,25 +327,22 @@ function init() {
     Math.floor(Math.random()*90000000+10000000);
   const dataStr = String(now.getDate()).padStart(2,'0') + '/' +
     String(now.getMonth()+1).padStart(2,'0') + '/' + now.getFullYear() +
-    ' ' + String(now.getHours()).padStart(2,'0') + ':' +
-    String(now.getMinutes()).padStart(2,'0');
-
+    ' ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
   document.getElementById('ID_Requisicao').value = id;
   document.getElementById('Data_Criacao').value = dataStr;
   document.getElementById('display-id').textContent = id;
   document.getElementById('display-data').textContent = 'Criado em: ' + dataStr;
-
   const hoje = now.toISOString().split('T')[0];
   document.getElementById('Data_Competencia').max = hoje;
-
+  document.getElementById('Data_Competencia').value = hoje;
   const minVenc = new Date(now);
   minVenc.setDate(minVenc.getDate() + 2);
-  document.getElementById('Data_Vencimento').min = minVenc.toISOString().split('T')[0];
-
+  const minVencStr = minVenc.toISOString().split('T')[0];
+  document.getElementById('Data_Vencimento').min = minVencStr;
+  document.getElementById('Data_Vencimento').value = minVencStr;
   ['ISS','PIS','COFINS','CSLL','IRPJ','INSS','Outros'].forEach(id => {
     document.getElementById(id).addEventListener('input', calcTotal);
   });
-
   document.getElementById('CNPJ_CPF').addEventListener('input', function() {
     _buscaId++;
     fornecedorStatus = 'pendente';
@@ -553,21 +350,16 @@ function init() {
     document.getElementById('cnpj_status').textContent = '';
   });
 }
-
-// ══ BU → REQUERENTES + APROVADOR ═════════════════════════════
 async function onBUChange() {
   const bu = document.getElementById('BU_Centro_Custo').value;
   const sel = document.getElementById('Nome_Requerente');
   sel.innerHTML = '<option value="">— selecione —</option>';
   document.getElementById('Email_Aprovador').value = '';
   if (!bu) return;
-
   if (REQUERENTES[bu]) {
     REQUERENTES[bu].forEach(r => {
       const opt = document.createElement('option');
-      opt.value = r.nome;
-      opt.dataset.email = r.email;
-      opt.textContent = r.nome;
+      opt.value = r.nome; opt.dataset.email = r.email; opt.textContent = r.nome;
       sel.appendChild(opt);
     });
     if (REQUERENTES[bu].length === 1) {
@@ -575,34 +367,16 @@ async function onBUChange() {
       document.getElementById('Email_Requerente').value = REQUERENTES[bu][0].email;
     }
   }
-
-  if (APROVADORES[bu]) {
-    document.getElementById('Email_Aprovador').value = APROVADORES[bu].email;
-  }
-
+  if (APROVADORES[bu]) document.getElementById('Email_Aprovador').value = APROVADORES[bu].email;
   try {
-    const r = await fetch(MAKE_BU_LOOKUP_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ bu: bu })
-    });
-    if (r.ok) {
-      const d = await r.json();
-      if (d.email_aprovador) {
-        document.getElementById('Email_Aprovador').value = d.email_aprovador;
-      }
-    }
-  } catch(e) {
-    console.warn('Lookup aprovador dinâmico falhou — usando fallback:', e);
-  }
+    const r = await fetch(MAKE_BU_LOOKUP_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ bu }) });
+    if (r.ok) { const d = await r.json(); if (d.email_aprovador) document.getElementById('Email_Aprovador').value = d.email_aprovador; }
+  } catch(e) { console.warn('Lookup aprovador falhou:', e); }
 }
-
 document.getElementById('Nome_Requerente').addEventListener('change', function() {
   const opt = this.options[this.selectedIndex];
   document.getElementById('Email_Requerente').value = opt.dataset.email || '';
 });
-
-// ══ CATEGORIA → AUTO-FILL ════════════════════════════════════
 function onCategoriaChange() {
   const val = document.getElementById('Categoria_CA').value;
   if (!val) {
@@ -616,104 +390,59 @@ function onCategoriaChange() {
   document.getElementById('Cat_Superior_N1').value = parts[2] || '';
   document.getElementById('Tipo_Despesa').value = parts[3] || '';
 }
-
-// ══ TIPO PAGAMENTO → PARCELAMENTO ════════════════════════════
 function onTipoPagamentoChange() {
   const tipo = document.getElementById('Tipo_Pagamento').value;
-  document.getElementById('sec-parcelamento').style.display =
-    tipo === 'Parcelado' ? 'block' : 'none';
+  document.getElementById('sec-parcelamento').style.display = tipo === 'Parcelado' ? 'block' : 'none';
 }
-
-// ══ TOTAL IMPOSTOS ═══════════════════════════════════════════
 function calcTotal() {
-  const campos = ['ISS','PIS','COFINS','CSLL','IRPJ','INSS','Outros'];
   let total = 0;
-  campos.forEach(id => {
-    total += parseFloat(document.getElementById(id).value) || 0;
-  });
-  document.getElementById('Total_Impostos').value =
-    total.toFixed(2).replace('.', ',');
+  ['ISS','PIS','COFINS','CSLL','IRPJ','INSS','Outros'].forEach(id => { total += parseFloat(document.getElementById(id).value) || 0; });
+  document.getElementById('Total_Impostos').value = total.toFixed(2).replace('.', ',');
 }
-
-// ══ CNPJ FORMAT ══════════════════════════════════════════════
 function formatCNPJ(input) {
   let v = input.value.replace(/\D/g, '');
   if (v.length <= 11) {
-    v = v.replace(/(\d{3})(\d)/, '$1.$2')
-         .replace(/(\d{3})(\d)/, '$1.$2')
-         .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    v = v.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2');
   } else {
-    v = v.replace(/(\d{2})(\d)/, '$1.$2')
-         .replace(/(\d{3})(\d)/, '$1.$2')
-         .replace(/(\d{3})(\d)/, '$1/$2')
-         .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+    v = v.replace(/(\d{2})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1/$2').replace(/(\d{4})(\d{1,2})$/, '$1-$2');
   }
   input.value = v;
 }
-
-// ══ HELPER: preenche campos do fornecedor ════════════════════
 function preencherCamposFornecedor(d) {
   if (d.razao_social        !== undefined) document.getElementById('Razao_Social').value        = d.razao_social        || '';
   if (d.nome_fantasia       !== undefined) document.getElementById('Nome_Fantasia').value       = d.nome_fantasia       || '';
   if (d.nome_extrato_cartao !== undefined) document.getElementById('Nome_extrato_Cartao').value = d.nome_extrato_cartao || '';
   if (d.situacao_cnpj       !== undefined) document.getElementById('Situacao_CNPJ').value       = d.situacao_cnpj       || '';
 }
-
-// ══ SITUAÇÃO 1 e 2: CNPJ / CPF ═══════════════════════════════
 function onBlurCNPJ(input) {
   const raw = input.value.replace(/\D/g,'');
   if (raw.length === 11 || raw.length === 14) buscarCNPJ();
 }
-
 async function buscarCNPJ() {
   const meuId = ++_buscaId;
-
   const raw = document.getElementById('CNPJ_CPF').value.replace(/\D/g,'');
   if (raw.length !== 11 && raw.length !== 14) return;
-
   const isCPF = raw.length === 11;
   setFornecedorStatus('pendente', '⏳ Consultando base...', '#666');
-
   let foundInBase = false;
   try {
-    const r = await fetch(MAKE_LOOKUP_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cnpj: raw, tipo: isCPF ? 'cpf' : 'cnpj' })
-    });
+    const r = await fetch(MAKE_LOOKUP_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ cnpj: raw, tipo: isCPF ? 'cpf' : 'cnpj' }) });
     if (meuId !== _buscaId) return;
     if (r.ok) {
       const d = await r.json();
       if (meuId !== _buscaId) return;
       if (d.found_in_base === true || d.found_in_base === 'true') {
-        preencherCamposFornecedor(d);
-        setFornecedorStatus('ok', '✔ Encontrado na base local', '#2a7a2a');
-        salvarFornecedor = false;
-        foundInBase = true;
+        preencherCamposFornecedor(d); setFornecedorStatus('ok', '✔ Encontrado na base local', '#2a7a2a'); salvarFornecedor = false; foundInBase = true;
       } else if (!isCPF && d.razao_social) {
-        preencherCamposFornecedor(d);
-        setFornecedorStatus('ok',
-          '✔ Dados obtidos da Receita Federal. Será gravado na base ao submeter.',
-          '#2a7a2a');
-        salvarFornecedor = true;
-        foundInBase = true;
+        preencherCamposFornecedor(d); setFornecedorStatus('ok', '✔ Dados obtidos da Receita Federal. Será gravado na base ao submeter.', '#2a7a2a'); salvarFornecedor = true; foundInBase = true;
       }
     }
-  } catch(e) {
-    if (meuId !== _buscaId) return;
-    console.warn('Lookup base falhou:', e);
-  }
-
+  } catch(e) { if (meuId !== _buscaId) return; }
   if (foundInBase) return;
-
   if (isCPF) {
-    setFornecedorStatus('novo',
-      '⚠ CPF não encontrado na base — preencha os campos manualmente. Será gravado ao submeter.',
-      '#b07000');
-    salvarFornecedor = true;
-    return;
+    setFornecedorStatus('novo', '⚠ CPF não encontrado na base — preencha os campos manualmente. Será gravado ao submeter.', '#b07000');
+    salvarFornecedor = true; return;
   }
-
   setFornecedorStatus('pendente', '⏳ Não está na base. Consultando Receita Federal...', '#666');
   try {
     const r = await fetch('https://publica.cnpj.ws/cnpj/' + raw);
@@ -721,98 +450,52 @@ async function buscarCNPJ() {
     if (!r.ok) throw new Error('não encontrado');
     const d = await r.json();
     if (meuId !== _buscaId) return;
-
-    const razao    = d.razao_social || '';
-    const fantasia = d.nome_fantasia || (d.estabelecimento && d.estabelecimento.nome_fantasia) || '';
-    const situacao = d.descricao_situacao_cadastral
-                  || (d.estabelecimento && d.estabelecimento.situacao_cadastral) || '';
-
-    preencherCamposFornecedor({ razao_social: razao, nome_fantasia: fantasia, situacao_cnpj: situacao });
-    setFornecedorStatus('ok',
-      '✔ Dados obtidos da Receita Federal. Será gravado na base ao submeter.',
-      '#2a7a2a');
+    preencherCamposFornecedor({ razao_social: d.razao_social||'', nome_fantasia: d.nome_fantasia||(d.estabelecimento&&d.estabelecimento.nome_fantasia)||'', situacao_cnpj: d.descricao_situacao_cadastral||(d.estabelecimento&&d.estabelecimento.situacao_cadastral)||'' });
+    setFornecedorStatus('ok', '✔ Dados obtidos da Receita Federal. Será gravado na base ao submeter.', '#2a7a2a');
     salvarFornecedor = true;
-
   } catch(e) {
     if (meuId !== _buscaId) return;
-    setFornecedorStatus('bloqueado',
-      '❌ CNPJ não encontrado na Receita Federal. Verifique o número ou use apenas o Nome Fantasia.',
-      '#C00000');
+    setFornecedorStatus('bloqueado', '❌ CNPJ não encontrado na Receita Federal. Verifique o número ou use apenas o Nome Fantasia.', '#C00000');
     salvarFornecedor = false;
   }
 }
-
-// ══ SITUAÇÃO 3: Nome Fantasia (CNPJ/CPF em branco) ═══════════
 async function buscarPorNomeFantasia() {
   const cnpj = document.getElementById('CNPJ_CPF').value.replace(/\D/g, '');
   if (cnpj.length > 0) return;
-
   const nomeFantasia = document.getElementById('Nome_Fantasia').value.trim();
   if (!nomeFantasia) return;
-
   setFornecedorStatus('pendente', '⏳ Buscando por Nome Fantasia...', '#666');
-
   let found = false;
   try {
-    const r = await fetch(MAKE_LOOKUP_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nome_fantasia: nomeFantasia })
-    });
+    const r = await fetch(MAKE_LOOKUP_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ nome_fantasia: nomeFantasia }) });
     if (r.ok) {
       const d = await r.json();
       if (d.found_in_base === true || d.found_in_base === 'true') {
         if (d.cnpj_cpf) document.getElementById('CNPJ_CPF').value = d.cnpj_cpf;
-        preencherCamposFornecedor(d);
-        setFornecedorStatus('ok', '✔ Encontrado na base por Nome Fantasia', '#2a7a2a');
-        salvarFornecedor = false;
-        found = true;
+        preencherCamposFornecedor(d); setFornecedorStatus('ok', '✔ Encontrado na base por Nome Fantasia', '#2a7a2a'); salvarFornecedor = false; found = true;
       }
     }
-  } catch(e) {
-    console.warn('buscarPorNomeFantasia:', e);
-  }
-
-  if (!found) {
-    setFornecedorStatus('novo',
-      '⚠ Nome Fantasia não encontrado na base. Será gravado ao submeter.',
-      '#b07000');
-    salvarFornecedor = true;
-  }
+  } catch(e) { console.warn('buscarPorNomeFantasia:', e); }
+  if (!found) { setFornecedorStatus('novo', '⚠ Nome Fantasia não encontrado na base. Será gravado ao submeter.', '#b07000'); salvarFornecedor = true; }
 }
-
-// ══ VALIDAÇÃO ════════════════════════════════════════════════
 async function validar() {
   const erros = [];
-  const req = (id, label) => {
-    const el = document.getElementById(id);
-    const val = el ? el.value.trim() : '';
-    if (!val) erros.push(label);
-  };
-
+  const req = (id, label) => { const el = document.getElementById(id); if (!el || !el.value.trim()) erros.push(label); };
   req('BU_Centro_Custo', 'Unidade de Negócio');
   req('Nome_Requerente', 'Requerente');
-
   const cnpjRaw = document.getElementById('CNPJ_CPF').value.replace(/\D/g,'');
-  const nfVal   = document.getElementById('Nome_Fantasia').value.trim();
-
+  const nfVal = document.getElementById('Nome_Fantasia').value.trim();
   if (!cnpjRaw && !nfVal) {
     erros.push('CNPJ / CPF ou Nome Fantasia (ao menos um é obrigatório)');
   } else if (cnpjRaw.length > 0 && cnpjRaw.length !== 11 && cnpjRaw.length !== 14) {
     erros.push('CNPJ / CPF inválido — deve ter 11 (CPF) ou 14 (CNPJ) dígitos');
   } else if (fornecedorStatus === 'pendente') {
-    if (cnpjRaw.length === 11 || cnpjRaw.length === 14) {
-      await buscarCNPJ();
-    } else if (nfVal) {
-      await buscarPorNomeFantasia();
-    }
-    if (fornecedorStatus === 'bloqueado') {
-      erros.push('CNPJ não encontrado na Receita Federal — corrija o número ou use apenas Nome Fantasia');
-    }
+    if (cnpjRaw.length === 11 || cnpjRaw.length === 14) await buscarCNPJ();
+    else if (nfVal) await buscarPorNomeFantasia();
+    if (fornecedorStatus === 'bloqueado') erros.push('CNPJ não encontrado na Receita Federal — corrija o número ou use apenas Nome Fantasia');
   } else if (fornecedorStatus === 'bloqueado') {
     erros.push('CNPJ não encontrado na Receita Federal — corrija o número ou use apenas Nome Fantasia');
   }
-
   req('Razao_Social', 'Razão Social');
   req('Categoria_CA', 'Categoria CA');
   req('Descricao', 'Descrição');
@@ -821,120 +504,63 @@ async function validar() {
   req('Valor_Liquido', 'Valor Líquido');
   req('Tipo_Pagamento', 'Tipo de Pagamento');
   req('Data_Vencimento', 'Data 1º Vencimento');
-
   const dc = document.getElementById('Data_Competencia').value;
-  if (dc) {
-    const hoje = new Date().toISOString().split('T')[0];
-    if (dc > hoje) erros.push('Data de Competência deve ser igual ou anterior à data atual');
-  }
-
+  if (dc && dc > new Date().toISOString().split('T')[0]) erros.push('Data de Competência deve ser igual ou anterior à data atual');
   const dv = document.getElementById('Data_Vencimento').value;
-  if (dv) {
-    const minVenc = new Date();
-    minVenc.setDate(minVenc.getDate() + 2);
-    if (dv < minVenc.toISOString().split('T')[0])
-      erros.push('Data 1º Vencimento deve ser no mínimo daqui a 2 dias');
-  }
-
+  if (dv) { const minVenc = new Date(); minVenc.setDate(minVenc.getDate()+2); if (dv < minVenc.toISOString().split('T')[0]) erros.push('Data 1º Vencimento deve ser no mínimo daqui a 2 dias'); }
   return erros;
 }
-
-// ══ COLETA DADOS ═════════════════════════════════════════════
 function coletarDados() {
   const g = id => document.getElementById(id) ? document.getElementById(id).value : '';
   const catParts = g('Categoria_CA').split('|');
-
   return {
-    ID_Requisicao:    g('ID_Requisicao'),
-    Data_Criacao:     g('Data_Criacao'),
-    Status:           'Pendente',
-    BU_Centro_Custo:  g('BU_Centro_Custo'),
-    Nome_Requerente:  g('Nome_Requerente'),
-    Email_Requerente: g('Email_Requerente'),
-    Email_Aprovador:  g('Email_Aprovador'),
-    CNPJ_CPF:         g('CNPJ_CPF').replace(/\D/g, ''),
-    Razao_Social:     g('Razao_Social'),
-    Nome_Fantasia:    g('Nome_Fantasia'),
-    Nome_extrato_Cartao: g('Nome_extrato_Cartao'),
-    Situacao_CNPJ:    g('Situacao_CNPJ'),
-    Salvar_Fornecedor: salvarFornecedor ? 'true' : 'false',
-    Categoria_CA:     catParts[0] || '',
-    Categoria_Superior: g('Categoria_Superior'),
-    Cat_Superior_N1:  g('Cat_Superior_N1'),
-    Tipo_Despesa:     g('Tipo_Despesa'),
-    Descricao:        g('Descricao'),
-    Numero_Documento: g('Numero_Documento'),
-    Data_Competencia: g('Data_Competencia'),
-    Valor_Bruto:      parseFloat(g('Valor_Bruto')) || 0,
-    Valor_Liquido:    parseFloat(g('Valor_Liquido')) || 0,
-    Tipo_Pagamento:   g('Tipo_Pagamento'),
-    Data_Vencimento:  g('Data_Vencimento'),
-    Venc_Parcela_1:   g('Venc_Parcela_1'),
-    Venc_Parcela_2:   g('Venc_Parcela_2'),
-    Venc_Parcela_3:   g('Venc_Parcela_3'),
-    Venc_Parcela_4:   g('Venc_Parcela_4'),
-    Venc_Parcela_5:   g('Venc_Parcela_5'),
-    Venc_Parcela_6:   g('Venc_Parcela_6'),
-    Venc_Parcela_7:   g('Venc_Parcela_7'),
-    Venc_Parcela_8:   g('Venc_Parcela_8'),
-    Venc_Parcela_9:   g('Venc_Parcela_9'),
-    Venc_Parcela_10:  g('Venc_Parcela_10'),
-    Venc_Parcela_11:  g('Venc_Parcela_11'),
-    Venc_Parcela_12:  g('Venc_Parcela_12'),
-    ISS:      parseFloat(g('ISS')) || 0,
-    PIS:      parseFloat(g('PIS')) || 0,
-    COFINS:   parseFloat(g('COFINS')) || 0,
-    CSLL:     parseFloat(g('CSLL')) || 0,
-    IRPJ:     parseFloat(g('IRPJ')) || 0,
-    INSS:     parseFloat(g('INSS')) || 0,
-    Outros:   parseFloat(g('Outros')) || 0,
-    Total_Impostos: parseFloat(g('Total_Impostos').replace(',','.')) || 0,
+    ID_Requisicao: g('ID_Requisicao'), Data_Criacao: g('Data_Criacao'), Status: 'Pendente',
+    BU_Centro_Custo: g('BU_Centro_Custo'), Nome_Requerente: g('Nome_Requerente'),
+    Email_Requerente: g('Email_Requerente'), Email_Aprovador: g('Email_Aprovador'),
+    CNPJ_CPF: g('CNPJ_CPF').replace(/\D/g,''), Razao_Social: g('Razao_Social'),
+    Nome_Fantasia: g('Nome_Fantasia'), Nome_extrato_Cartao: g('Nome_extrato_Cartao'),
+    Situacao_CNPJ: g('Situacao_CNPJ'), Salvar_Fornecedor: salvarFornecedor ? 'true' : 'false',
+    Categoria_CA: catParts[0]||'', Categoria_Superior: g('Categoria_Superior'),
+    Cat_Superior_N1: g('Cat_Superior_N1'), Tipo_Despesa: g('Tipo_Despesa'),
+    Descricao: g('Descricao'), Numero_Documento: g('Numero_Documento'),
+    Data_Competencia: g('Data_Competencia'), Valor_Bruto: parseFloat(g('Valor_Bruto'))||0,
+    Valor_Liquido: parseFloat(g('Valor_Liquido'))||0, Tipo_Pagamento: g('Tipo_Pagamento'),
+    Data_Vencimento: g('Data_Vencimento'),
+    Venc_Parcela_1: g('Venc_Parcela_1'), Venc_Parcela_2: g('Venc_Parcela_2'), Venc_Parcela_3: g('Venc_Parcela_3'),
+    Venc_Parcela_4: g('Venc_Parcela_4'), Venc_Parcela_5: g('Venc_Parcela_5'), Venc_Parcela_6: g('Venc_Parcela_6'),
+    Venc_Parcela_7: g('Venc_Parcela_7'), Venc_Parcela_8: g('Venc_Parcela_8'), Venc_Parcela_9: g('Venc_Parcela_9'),
+    Venc_Parcela_10: g('Venc_Parcela_10'), Venc_Parcela_11: g('Venc_Parcela_11'), Venc_Parcela_12: g('Venc_Parcela_12'),
+    ISS: parseFloat(g('ISS'))||0, PIS: parseFloat(g('PIS'))||0, COFINS: parseFloat(g('COFINS'))||0,
+    CSLL: parseFloat(g('CSLL'))||0, IRPJ: parseFloat(g('IRPJ'))||0, INSS: parseFloat(g('INSS'))||0,
+    Outros: parseFloat(g('Outros'))||0, Total_Impostos: parseFloat(g('Total_Impostos').replace(',','.'))||0,
     Observacoes: g('Observacoes')
   };
 }
-
-// ══ ENVIO ════════════════════════════════════════════════════
 document.getElementById('form-req').addEventListener('submit', async function(e) {
   e.preventDefault();
   document.getElementById('msg-success').style.display = 'none';
   document.getElementById('msg-error').style.display = 'none';
-
   const btn = this.querySelector('.btn-submit');
-  btn.textContent = 'Validando...';
-  btn.disabled = true;
-
+  btn.textContent = 'Validando...'; btn.disabled = true;
   const erros = await validar();
   if (erros.length > 0) {
-    document.getElementById('msg-error-text').textContent =
-      'Atenção: ' + erros.join(' | ');
+    document.getElementById('msg-error-text').textContent = 'Atenção: ' + erros.join(' | ');
     document.getElementById('msg-error').style.display = 'block';
     document.getElementById('msg-error').scrollIntoView({ behavior: 'smooth' });
-    btn.textContent = 'Enviar Requisição →';
-    btn.disabled = false;
-    return;
+    btn.textContent = 'Enviar Requisição →'; btn.disabled = false; return;
   }
-
   btn.textContent = 'Enviando...';
-
   try {
-    await fetch(MAKE_WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(coletarDados())
-    });
+    await fetch(MAKE_WEBHOOK_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(coletarDados()) });
     document.getElementById('msg-success').style.display = 'block';
     document.getElementById('msg-success').scrollIntoView({ behavior: 'smooth' });
     btn.textContent = '✓ Enviado';
   } catch(err) {
-    document.getElementById('msg-error-text').textContent =
-      'Erro de conexão. Verifique sua internet e tente novamente.';
+    document.getElementById('msg-error-text').textContent = 'Erro de conexão. Verifique sua internet e tente novamente.';
     document.getElementById('msg-error').style.display = 'block';
-    btn.textContent = 'Enviar Requisição →';
-    btn.disabled = false;
+    btn.textContent = 'Enviar Requisição →'; btn.disabled = false;
   }
 });
-
-// ══ RESET ════════════════════════════════════════════════════
 function resetForm() {
   if (!confirm('Limpar todos os campos?')) return;
   document.getElementById('form-req').reset();
@@ -942,12 +568,9 @@ function resetForm() {
   document.getElementById('Total_Impostos').value = '0,00';
   document.getElementById('msg-success').style.display = 'none';
   document.getElementById('msg-error').style.display = 'none';
-  fornecedorStatus = 'pendente';
-  salvarFornecedor = false;
+  fornecedorStatus = 'pendente'; salvarFornecedor = false;
   init();
 }
-
-// ══ START ════════════════════════════════════════════════════
 init();
 </script>
 </body>
