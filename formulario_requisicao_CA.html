@@ -334,7 +334,6 @@ function init() {
   document.getElementById('display-data').textContent = 'Criado em: ' + dataStr;
   const hoje = now.toISOString().split('T')[0];
   document.getElementById('Data_Competencia').max = hoje;
-  document.getElementById('Data_Competencia').value = hoje;
   const minVenc = new Date(now);
   minVenc.setDate(minVenc.getDate() + 2);
   const minVencStr = minVenc.toISOString().split('T')[0];
