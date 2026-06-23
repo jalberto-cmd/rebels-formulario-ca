@@ -285,34 +285,81 @@ table.parcelas td.num { background: #F2F2F2; font-weight: bold; color: #1F3864; 
             <select id="Categoria_CA" required onchange="onCategoriaChange()">
               <option value="">— selecione —</option>
               <optgroup label="── DESPESAS ──">
-                <option value="Aluguel e Condomínio|Estrutura e Ocupação|Despesas|Despesa">Aluguel e Condomínio</option>
-                <option value="Folha de Pagamento|Pessoal|Despesas|Despesa">Folha de Pagamento</option>
-                <option value="Impostos e Taxas|Fiscal e Jurídico|Despesas|Despesa">Impostos e Taxas</option>
-                <option value="Contabilidade e Auditoria|Fiscal e Jurídico|Despesas|Despesa">Contabilidade e Auditoria</option>
-                <option value="Jurídico e Cartório|Fiscal e Jurídico|Despesas|Despesa">Jurídico e Cartório</option>
-                <option value="Seguros|Seguros e Riscos|Despesas|Despesa">Seguros</option>
-                <option value="Viagens e Deslocamento|Viagens e Representação|Despesas|Despesa">Viagens e Deslocamento</option>
-                <option value="Refeições e Representação|Viagens e Representação|Despesas|Despesa">Refeições e Representação</option>
-                <option value="Material de Escritório|Administrativo|Despesas|Despesa">Material de Escritório</option>
-                <option value="Software e Assinaturas SaaS|Tecnologia|Despesas|Despesa">Software e Assinaturas SaaS</option>
-                <option value="Infraestrutura e Cloud|Tecnologia|Despesas|Despesa">Infraestrutura e Cloud</option>
-                <option value="Desenvolvimento e Tecnologia|Tecnologia|Despesas|Despesa">Desenvolvimento e Tecnologia</option>
-                <option value="Marketing Digital|Marketing e Comunicação|Despesas|Despesa">Marketing Digital</option>
-                <option value="Produção de Conteúdo|Marketing e Comunicação|Despesas|Despesa">Produção de Conteúdo</option>
-                <option value="Influenciadores e Parcerias|Marketing e Comunicação|Despesas|Despesa">Influenciadores e Parcerias</option>
-                <option value="Design e Identidade Visual|Marketing e Comunicação|Despesas|Despesa">Design e Identidade Visual</option>
-                <option value="Eventos e Workshops|Eventos|Despesas|Despesa">Eventos e Workshops</option>
-                <option value="Locação de Espaço para Evento|Eventos|Despesas|Despesa">Locação de Espaço para Evento</option>
-                <option value="Aporte em Startup|Investimentos|Despesas|Despesa">Aporte em Startup</option>
-                <option value="Consultoria Estratégica|Investimentos|Despesas|Despesa">Consultoria Estratégica</option>
+                <option value="Alimentação e Copa|Alimentação e Copa|Despesas|Despesa">Alimentação e Copa</option>
+                <option value="Aluguel e Imóvel|Aluguel e Imóvel|Despesas|Despesa">Aluguel e Imóvel</option>
+                <option value="Assessoria / Agência de Marketing|Assessoria / Agência de Marketing|Despesas|Despesa">Assessoria / Agência de Marketing</option>
+                <option value="Benefícios|Benefícios|Despesas|Despesa">Benefícios</option>
+                <option value="Branding|Branding|Despesas|Despesa">Branding</option>
+                <option value="Brindes para Clientes|4.06 Despesas Comerciais|Despesas|Despesa">Brindes para Clientes</option>
+                <option value="Bônus e Gratificações|Bônus e Gratificações|Despesas|Despesa">Bônus e Gratificações</option>
+                <option value="Cancelamentos e Estornos|Cancelamentos e Estornos|Despesas|Despesa">Cancelamentos e Estornos</option>
+                <option value="Comissões de Vendas|Comissões de Vendas|Despesas|Despesa">Comissões de Vendas</option>
+                <option value="Compra|Compra|Despesas|Despesa">Compra</option>
+                <option value="Compra de Serviço|4.06 Despesas Comerciais|Despesas|Despesa">Compra de Serviço</option>
+                <option value="Condomínio e IPTU|Condomínio e IPTU|Despesas|Despesa">Condomínio e IPTU</option>
+                <option value="Consultoria / Assessoria Adm|Consultoria / Assessoria Adm|Despesas|Despesa">Consultoria / Assessoria Adm</option>
+                <option value="Custo Operacional com Pessoas|Custo Operacional com Pessoas|Despesas|Despesa">Custo Operacional com Pessoas</option>
+                <option value="Descontos Incondicionais|Descontos Incondicionais|Despesas|Despesa">Descontos Incondicionais</option>
+                <option value="Despesas a identificar|4.11 Outras Despesas|Despesas|Despesa">Despesas a identificar</option>
+                <option value="Encargos Trabalhistas|Encargos Trabalhistas|Despesas|Despesa">Encargos Trabalhistas</option>
+                <option value="Energia Elétrica|4.08 Despesas com Imóvel|Despesas|Despesa">Energia Elétrica</option>
+                <option value="Energia, Água e gás|Energia, Água e gás|Despesas|Despesa">Energia, Água e gás</option>
+                <option value="Eventos e Logística|Eventos e Logística|Despesas|Despesa">Eventos e Logística</option>
+                <option value="Ferramentas de Vendas e Performance|Ferramentas de Vendas e Performance|Despesas|Despesa">Ferramentas de Vendas e Performance</option>
+                <option value="Fretes pagos|4.06 Despesas Comerciais|Despesas|Despesa">Fretes pagos</option>
+                <option value="Impostos sobre Vendas (Simples/ISS)|Impostos sobre Vendas (Simples/ISS)|Despesas|Despesa">Impostos sobre Vendas (Simples/ISS)</option>
+                <option value="Investimento em Participações|4.10 Despesas Financeiras|Despesas|Despesa">Investimento em Participações</option>
+                <option value="IRRF|4.01 Impostos sobre Vendas e sobre Serviços|Despesas|Despesa">IRRF</option>
+                <option value="ISS sobre Faturamento|4.01 Impostos sobre Vendas e sobre Serviços|Despesas|Despesa">ISS sobre Faturamento</option>
+                <option value="Juros e Encargos Financeiros|Juros e Encargos Financeiros|Despesas|Despesa">Juros e Encargos Financeiros</option>
+                <option value="Manutenção e Conservação|Manutenção e Conservação|Despesas|Despesa">Manutenção e Conservação</option>
+                <option value="Manutenção Predial|4.08 Despesas com Imóvel|Despesas|Despesa">Manutenção Predial</option>
+                <option value="Marketing e Publicidade|4.06 Despesas Comerciais|Despesas|Despesa">Marketing e Publicidade</option>
+                <option value="Materiais e Brindes|Materiais e Brindes|Despesas|Despesa">Materiais e Brindes</option>
+                <option value="Materiais e Itens de Vendas|Materiais e Itens de Vendas|Despesas|Despesa">Materiais e Itens de Vendas</option>
+                <option value="Material de Escritório e Limpeza|Material de Escritório e Limpeza|Despesas|Despesa">Material de Escritório e Limpeza</option>
+                <option value="Máquinas e Equipamentos|Máquinas e Equipamentos|Despesas|Despesa">Máquinas e Equipamentos</option>
+                <option value="Mentores e Convidados|Mentores e Convidados|Despesas|Despesa">Mentores e Convidados</option>
+                <option value="Mídia Paga / Anúncios|Mídia Paga / Anúncios|Despesas|Despesa">Mídia Paga / Anúncios</option>
+                <option value="Móveis e Instalações|Móveis e Instalações|Despesas|Despesa">Móveis e Instalações</option>
+                <option value="Multas pagas|4.10 Despesas Financeiras|Despesas|Despesa">Multas pagas</option>
+                <option value="PIS/COFINS/CSLL|PIS/COFINS/CSLL|Despesas|Despesa">PIS/COFINS/CSLL</option>
+                <option value="Produtora (Vídeo / Foto / Criação)|Produtora (Vídeo / Foto / Criação)|Despesas|Despesa">Produtora (Vídeo / Foto / Criação)</option>
+                <option value="Remuneração de Autônomos|4.03 Despesas com Salários e Encargos|Despesas|Despesa">Remuneração de Autônomos</option>
+                <option value="Remuneração de Autônomos / PJ|Remuneração de Autônomos / PJ|Despesas|Despesa">Remuneração de Autônomos / PJ</option>
+                <option value="Remuneração de Equipe Comercial|Remuneração de Equipe Comercial|Despesas|Despesa">Remuneração de Equipe Comercial</option>
+                <option value="Restituição de Receita|4.02 Despesas com Vendas e Serviços|Despesas|Despesa">Restituição de Receita</option>
+                <option value="Retenção - Darf 5952 - PIS/COFINS/CSLL|4.01 Impostos sobre Vendas e sobre Serviços|Despesas|Despesa">Retenção - Darf 5952 - PIS/COFINS/CSLL</option>
+                <option value="Retenções na Fonte (IRRF/PIS/COFINS)|Retenções na Fonte (IRRF/PIS/COFINS)|Despesas|Despesa">Retenções na Fonte (IRRF/PIS/COFINS)</option>
+                <option value="Salários|4.03 Despesas com Salários e Encargos|Despesas|Despesa">Salários</option>
+                <option value="Salários CLT|Salários CLT|Despesas|Despesa">Salários CLT</option>
+                <option value="Softwares Administrativos|Softwares Administrativos|Despesas|Despesa">Softwares Administrativos</option>
+                <option value="Softwares Operacionais|Softwares Operacionais|Despesas|Despesa">Softwares Operacionais</option>
+                <option value="Tarifas Bancárias|4.10 Despesas Financeiras|Despesas|Despesa">Tarifas Bancárias</option>
+                <option value="Tarifas de Antecipação|Tarifas de Antecipação|Despesas|Despesa">Tarifas de Antecipação</option>
+                <option value="Taxa de Gateway / MDR|Taxa de Gateway / MDR|Despesas|Despesa">Taxa de Gateway / MDR</option>
+                <option value="Taxas e Cartório|Taxas e Cartório|Despesas|Despesa">Taxas e Cartório</option>
+                <option value="TI/Softwares e suporte|4.07 Despesas de TI|Despesas|Despesa">TI/Softwares e suporte</option>
+                <option value="Time de Produto e Entrega|Time de Produto e Entrega|Despesas|Despesa">Time de Produto e Entrega</option>
+                <option value="Transferência de Saída|Transferência de Saída|Despesas|Despesa">Transferência de Saída</option>
+                <option value="Transporte e Deslocamento|Transporte e Deslocamento|Despesas|Despesa">Transporte e Deslocamento</option>
+                <option value="Vale-Transporte|4.04 Despesas com Colaboradores|Despesas|Despesa">Vale-Transporte</option>
+                <option value="Viagens e Estadias|Viagens e Estadias|Despesas|Despesa">Viagens e Estadias</option>
               </optgroup>
               <optgroup label="── RECEITAS ──">
-                <option value="Receita de Cursos e Programas|Produtos Digitais|Receitas|Receita">Receita de Cursos e Programas</option>
-                <option value="Receita de Eventos|Eventos|Receitas|Receita">Receita de Eventos</option>
-                <option value="Receita de Assinaturas|Produtos Digitais|Receitas|Receita">Receita de Assinaturas</option>
-                <option value="Receita de Publicidade|Publicidade e Parcerias|Receitas|Receita">Receita de Publicidade</option>
-                <option value="Receita de Serviços|Serviços|Receitas|Receita">Receita de Serviços</option>
-                <option value="Dividendos e Retorno Portfólio|Retornos Financeiros|Receitas|Receita">Dividendos e Retorno Portfólio</option>
+                <option value="Devolução Fornecedor|3.03 Outras Receitas e Entradas|Receitas|Receita">Devolução Fornecedor</option>
+                <option value="Entradas Desconexas|3.03 Outras Receitas e Entradas|Receitas|Receita">Entradas Desconexas</option>
+                <option value="Receita de Rateio Corporativo|Receita de Rateio Corporativo|Receitas|Receita">Receita de Rateio Corporativo</option>
+                <option value="Receitas de Assinaturas|Receitas de Assinaturas|Receitas|Receita">Receitas de Assinaturas</option>
+                <option value="Receitas de Eventos e Mentorias|Receitas de Eventos e Mentorias|Receitas|Receita">Receitas de Eventos e Mentorias</option>
+                <option value="Receitas de Patrocínio / Parceria|Receitas de Patrocínio / Parceria|Receitas|Receita">Receitas de Patrocínio / Parceria</option>
+                <option value="Receitas de Serviços|3.01 Receitas de Vendas e de Serviços|Receitas|Receita">Receitas de Serviços</option>
+                <option value="Receitas de Serviços / Consultoria|Receitas de Serviços / Consultoria|Receitas|Receita">Receitas de Serviços / Consultoria</option>
+                <option value="Receitas de Upsell / Order Bump|Receitas de Upsell / Order Bump|Receitas|Receita">Receitas de Upsell / Order Bump</option>
+                <option value="Receitas de Vendas|3.01 Receitas de Vendas e de Serviços|Receitas|Receita">Receitas de Vendas</option>
+                <option value="Rendimentos de investimentos|Rendimentos de investimentos|Receitas|Receita">Rendimentos de investimentos</option>
+                <option value="Saldo Inicial|Saldo Inicial|Receitas|Receita">Saldo Inicial</option>
+                <option value="Transferência de Entrada|Transferência de Entrada|Receitas|Receita">Transferência de Entrada</option>
               </optgroup>
             </select>
           </td>
@@ -493,17 +540,17 @@ const MAKE_BU_LOOKUP_URL = 'https://hook.us2.make.com/orc45we6wjth7itme75feu1tti
 const REQUERENTES = {
   'Corporativo': [{ nome: 'José Alberto', email: 'jalberto@rebels.cc' }],
   'Ventures':    [{ nome: 'Claudia',      email: 'claudia@rebels.cc' }],
-  'Fitfeed':     [{ nome: 'Júlia',        email: 'julia@jars.com.br' }],
-  'MdD':         [{ nome: 'Amaral',       email: 'amaral@manualdedonos.com.br' }],
-  'WBC':         [{ nome: 'Gustavo',      email: 'admin@wellnessbuildersclub.com.br' }]
+  'Fitfeed':     [{ nome: 'Renato',       email: 'renato@rebels.cc' }],
+  'MdD':         [{ nome: 'Amaral',       email: 'amaral@rebels.cc' }],
+  'WBC':         [{ nome: 'Gustavo',      email: 'gustavo@rebels.cc' }]
 };
 
 const APROVADORES = {
   'Corporativo': { nome: 'José Alberto', email: 'jalbertosilva@gmail.com' },
   'Ventures':    { nome: 'Jayme',        email: 'jayme@rebels.cc' },
   'Fitfeed':     { nome: 'Michel',       email: 'michel@rebels.cc' },
-  'MdD':         { nome: 'Bechi',        email: 'bechi@manualdedonos.com.br' },
-  'WBC':         { nome: 'Thiago',       email: 'thiago@wellnessbuildersclub.com.br' }
+  'MdD':         { nome: 'Bechi',        email: 'bechi@rebels.cc' },
+  'WBC':         { nome: 'Thiago',       email: 'thiago@rebels.cc' }
 };
 
 // ══ ESTADO DO FORNECEDOR ══════════════════════════════════════
