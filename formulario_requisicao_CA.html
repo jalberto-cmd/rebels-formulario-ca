@@ -338,8 +338,8 @@ table.parcelas td.num { background: #F2F2F2; font-weight: bold; color: #1F3864; 
         <tr>
           <td class="lbl">Valor Bruto (R$) <span class="req">*</span></td>
           <td class="val"><input type="number" id="Valor_Bruto" step="0.01" min="0" required placeholder="0,00"></td>
-          <td class="lbl">Valor Líquido (R$) <span class="req">*</span></td>
-          <td class="val"><input type="number" id="Valor_Liquido" step="0.01" min="0" required placeholder="0,00"></td>
+          <td class="lbl">Valor Líquido (R$)</td>
+          <td class="val"><input type="number" id="Valor_Liquido" step="0.01" min="0" placeholder="0,00" oninput="onValorLiquidoChange()"></td>
           <td class="lbl" colspan="2"></td>
         </tr>
         <tr>
@@ -394,7 +394,7 @@ table.parcelas td.num { background: #F2F2F2; font-weight: bold; color: #1F3864; 
     </div>
 
     <!-- ══ 5. RETENÇÕES E IMPOSTOS ════════════════════════════ -->
-    <div class="section">
+    <div class="section" id="sec-impostos" style="display:none">
       <div class="section-title">5. Retenções e Impostos</div>
       <table class="impostos">
         <tr>
@@ -633,6 +633,12 @@ function onTipoPagamentoChange() {
     tipo === 'Parcelado' ? 'block' : 'none';
 }
 
+// ══ VALOR LÍQUIDO → MOSTRAR/OCULTAR IMPOSTOS ═════════════════
+function onValorLiquidoChange() {
+  const val = document.getElementById('Valor_Liquido').value.trim();
+  document.getElementById('sec-impostos').style.display = val ? 'block' : 'none';
+}
+
 // ══ TOTAL IMPOSTOS ═══════════════════════════════════════════
 function calcTotal() {
   const campos = ['ISS','PIS','COFINS','CSLL','IRPJ','INSS','Outros'];
@@ -847,7 +853,6 @@ async function validar() {
   req('Descricao', 'Descrição');
   req('Data_Competencia', 'Data de Competência');
   req('Valor_Bruto', 'Valor Bruto');
-  req('Valor_Liquido', 'Valor Líquido');
   req('Tipo_Pagamento', 'Tipo de Pagamento');
   req('Data_Vencimento', 'Data 1º Vencimento');
 
@@ -895,7 +900,7 @@ function coletarDados() {
     Numero_Documento: g('Numero_Documento'),
     Data_Competencia: g('Data_Competencia'),
     Valor_Bruto:      parseFloat(g('Valor_Bruto')) || 0,
-    Valor_Liquido:    parseFloat(g('Valor_Liquido')) || 0,
+    Valor_Liquido:    parseFloat(g('Valor_Liquido')) || parseFloat(g('Valor_Bruto')) || 0,
     Tipo_Pagamento:   g('Tipo_Pagamento'),
     Data_Vencimento:  g('Data_Vencimento'),
     Venc_Parcela_1:   g('Tipo_Pagamento') === 'À Vista' ? g('Data_Vencimento') : g('Venc_Parcela_1'),
