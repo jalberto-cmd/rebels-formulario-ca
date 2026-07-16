@@ -239,6 +239,7 @@ table.parcelas td.num { background: #F2F2F2; font-weight: bold; color: #1F3864; 
             </select>
             <input type="hidden" id="Email_Requerente">
             <input type="hidden" id="Email_Aprovador">
+            <div class="cnpj-status" id="bu_lookup_status"></div>
           </td>
         </tr>
       </table>
@@ -259,14 +260,24 @@ table.parcelas td.num { background: #F2F2F2; font-weight: bold; color: #1F3864; 
           </td>
         </tr>
         <tr>
-          <td class="lbl">Razão Social <span class="req">*</span></td>
-          <td class="val" colspan="5"><input type="text" id="Razao_Social" required></td>
-        </tr>
-        <tr>
           <td class="lbl">Nome Fantasia</td>
           <td class="val" colspan="2"><input type="text" id="Nome_Fantasia" onblur="buscarPorNomeFantasia()"></td>
           <td class="lbl">Nome Extrato Cartão</td>
           <td class="val" colspan="2"><input type="text" id="Nome_extrato_Cartao"></td>
+        </tr>
+        <tr>
+          <td class="lbl">Razão Social</td>
+          <td class="val" colspan="5"><input type="text" id="Razao_Social"></td>
+        </tr>
+        <tr id="fuzzy_suggestion_row" style="display:none;">
+          <td></td>
+          <td class="val" colspan="5">
+            <div id="fuzzy_suggestion_box" style="background:#fff8e1;border:1px solid #ffcc80;border-radius:6px;padding:8px 12px;font-size:13px;">
+              <div id="fuzzy_suggestion_text" style="margin-bottom:6px;"></div>
+              <div id="fuzzy_suggestion_list"></div>
+              <button type="button" class="btn-lookup" style="margin-top:6px;" onclick="rejeitarSugestaoFuzzy()">✘ Nenhum destes, é novo</button>
+            </div>
+          </td>
         </tr>
         <tr>
           <td class="lbl">Situação Receita Federal</td>
@@ -364,6 +375,24 @@ table.parcelas td.num { background: #F2F2F2; font-weight: bold; color: #1F3864; 
             </select>
           </td>
         </tr>
+        <tr id="row-nf" style="display:none">
+          <td class="lbl">Emissão de NF</td>
+          <td class="val" colspan="5">
+            <select id="Emissao_NF">
+              <option value="NÃO">NÃO</option>
+              <option value="SIM">SIM</option>
+            </select>
+          </td>
+        </tr>
+        <tr id="row-cartao" style="display:none">
+          <td class="lbl">Cobrança por Cartão</td>
+          <td class="val" colspan="5">
+            <select id="Recebido_Cartao">
+              <option value="NÃO">NÃO</option>
+              <option value="SIM">SIM</option>
+            </select>
+          </td>
+        </tr>
         <tr>
           <td class="lbl">Categoria Superior</td>
           <td class="val readonly"><input type="text" id="Categoria_Superior" class="readonly-input" readonly placeholder="Automático"></td>
@@ -383,13 +412,6 @@ table.parcelas td.num { background: #F2F2F2; font-weight: bold; color: #1F3864; 
           <td class="val" colspan="2"><input type="date" id="Data_Competencia" required></td>
         </tr>
         <tr>
-          <td class="lbl">Valor Bruto (R$) <span class="req">*</span></td>
-          <td class="val"><input type="number" id="Valor_Bruto" step="0.01" min="0" required placeholder="0,00"></td>
-          <td class="lbl">Valor Líquido (R$)</td>
-          <td class="val"><input type="number" id="Valor_Liquido" step="0.01" min="0" placeholder="0,00" oninput="onValorLiquidoChange()"></td>
-          <td class="lbl" colspan="2"></td>
-        </tr>
-        <tr>
           <td class="lbl">Tipo de Pagamento <span class="req">*</span></td>
           <td class="val" colspan="2">
             <select id="Tipo_Pagamento" required onchange="onTipoPagamentoChange()">
@@ -400,6 +422,13 @@ table.parcelas td.num { background: #F2F2F2; font-weight: bold; color: #1F3864; 
           </td>
           <td class="lbl">Data 1º Vencimento <span class="req">*</span></td>
           <td class="val" colspan="2"><input type="date" id="Data_Vencimento" required></td>
+        </tr>
+        <tr>
+          <td class="lbl">Valor Bruto (R$) <span class="req">*</span></td>
+          <td class="val"><input type="number" id="Valor_Bruto" step="0.01" min="0" required placeholder="0,00"></td>
+          <td class="lbl">Valor Líquido (R$)</td>
+          <td class="val"><input type="number" id="Valor_Liquido" step="0.01" min="0" placeholder="0,00" oninput="onValorLiquidoChange()"></td>
+          <td class="lbl" colspan="2"></td>
         </tr>
       </table>
     </div>
@@ -489,7 +518,7 @@ table.parcelas td.num { background: #F2F2F2; font-weight: bold; color: #1F3864; 
       <table class="fields">
         <tr>
           <td class="val" style="padding:8px;">
-            <textarea id="Observacoes" placeholder="Informações adicionais relevantes para aprovação..."></textarea>
+            <textarea id="Observacoes" placeholder="Informações importantes para aprovação ou emissão da nota fiscal"></textarea>
           </td>
         </tr>
       </table>
@@ -535,23 +564,7 @@ table.parcelas td.num { background: #F2F2F2; font-weight: bold; color: #1F3864; 
 const MAKE_WEBHOOK_URL   = 'https://hook.us2.make.com/1nlkcr3x6ocubf0mtycachgg3gtehhw1';
 const MAKE_LOOKUP_URL    = 'https://hook.us2.make.com/rlcy9909pw828x4yrjcmguicquq69x57';
 const MAKE_BU_LOOKUP_URL = 'https://hook.us2.make.com/orc45we6wjth7itme75feu1tti2ra99b';
-
-// ══ DADOS ════════════════════════════════════════════════════
-const REQUERENTES = {
-  'Corporativo': [{ nome: 'José Alberto', email: 'jalberto@rebels.cc' }],
-  'Ventures':    [{ nome: 'Claudia',      email: 'claudia@rebels.cc' }],
-  'Fitfeed':     [{ nome: 'Renato',       email: 'julia@jars.com.br' }],
-  'MdD':         [{ nome: 'Amaral',       email: 'gabriel.amaral@manualdedonos.com.br' }],
-  'WBC':         [{ nome: 'Gustavo',      email: 'admin@wellnessbuilderclub.com.br' }]
-};
-
-const APROVADORES = {
-  'Corporativo': { nome: 'José Alberto', email: 'jalbertosilva@gmail.com' },
-  'Ventures':    { nome: 'Jayme',        email: 'jayme@rebels.cc' },
-  'Fitfeed':     { nome: 'Michel',       email: 'michel@rebels.cc' },
-  'MdD':         { nome: 'Bechi',        email: 'bechi@manualdedonos.com.br' },
-  'WBC':         { nome: 'Thiago',       email: 'michel@rebels.cc' }
-};
+const MAKE_LISTAR_FORNECEDORES_URL = 'https://hook.us2.make.com/m29dkmiunx34vq47rpmfd1wazy6cml0e'; // item 6: lista completa p/ busca fuzzy (producao)
 
 // ══ ESTADO DO FORNECEDOR ══════════════════════════════════════
 // 'pendente'  → busca ainda não foi disparada (ou campo mudou após busca)
@@ -590,11 +603,9 @@ function init() {
   document.getElementById('Data_Competencia').max = hoje;
   document.getElementById('Data_Competencia').value = hoje;
 
-  const minVenc = new Date(now);
-  minVenc.setDate(minVenc.getDate() + 2);
-  const minVencStr = minVenc.toISOString().split('T')[0];
-  document.getElementById('Data_Vencimento').min = minVencStr;
-  document.getElementById('Data_Vencimento').value = minVencStr;
+  // Data 1º Vencimento começa em branco; o mínimo permitido é hoje + 2 dias
+  // (data corrente, não a Data de Competência) — ver atualizarMinVencimento().
+  atualizarMinVencimento();
 
   ['ISS','PIS','COFINS','CSLL','IRPJ','INSS','Outros'].forEach(id => {
     document.getElementById(id).addEventListener('input', calcTotal);
@@ -610,31 +621,22 @@ function init() {
 }
 
 // ══ BU → REQUERENTES + APROVADOR ═════════════════════════════
+// Sem dados hardcoded: Requerentes vêm da aba REQUERENTES e o Aprovador vem da
+// aba CENTROS_CUSTO, ambos buscados ao vivo via MAKE_BU_LOOKUP_URL a cada troca de BU.
 async function onBUChange() {
   const bu = document.getElementById('BU_Centro_Custo').value;
   const sel = document.getElementById('Nome_Requerente');
+  const statusEl = document.getElementById('bu_lookup_status');
   sel.innerHTML = '<option value="">— selecione —</option>';
+  document.getElementById('Email_Requerente').value = '';
   document.getElementById('Email_Aprovador').value = '';
+  document.getElementById('Nome_Aprovador').value = '';
+  statusEl.textContent = '';
   if (!bu) return;
 
-  if (REQUERENTES[bu]) {
-    REQUERENTES[bu].forEach(r => {
-      const opt = document.createElement('option');
-      opt.value = r.nome;
-      opt.dataset.email = r.email;
-      opt.textContent = r.nome;
-      sel.appendChild(opt);
-    });
-    if (REQUERENTES[bu].length === 1) {
-      sel.value = REQUERENTES[bu][0].nome;
-      document.getElementById('Email_Requerente').value = REQUERENTES[bu][0].email;
-    }
-  }
-
-  // Fallback imediato, sobrescrito pelo lookup dinâmico se disponível
-  if (APROVADORES[bu]) {
-    document.getElementById('Email_Aprovador').value = APROVADORES[bu].email;
-  }
+  sel.innerHTML = '<option value="">⏳ Carregando requerentes...</option>';
+  statusEl.textContent = '⏳ Buscando requerente(s) e aprovador da BU...';
+  statusEl.style.color = '#666';
 
   try {
     const r = await fetch(MAKE_BU_LOOKUP_URL, {
@@ -642,14 +644,49 @@ async function onBUChange() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ bu: bu })
     });
-    if (r.ok) {
-      const d = await r.json();
-      if (d.email_aprovador) {
-        document.getElementById('Email_Aprovador').value = d.email_aprovador;
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+
+    if (d.email_aprovador) {
+      document.getElementById('Email_Aprovador').value = d.email_aprovador;
+    }
+    if (d.nome_aprovador) {
+      document.getElementById('Nome_Aprovador').value = d.nome_aprovador;
+    }
+
+    sel.innerHTML = '<option value="">— selecione —</option>';
+    if (Array.isArray(d.requerentes) && d.requerentes.length > 0) {
+      d.requerentes.forEach(req => {
+        const nome  = req['1'] || req.nome  || '';
+        const email = req['2'] || req.email || '';
+        if (!nome) return;
+        const opt = document.createElement('option');
+        opt.value = nome;
+        opt.dataset.email = email;
+        opt.textContent = nome;
+        sel.appendChild(opt);
+      });
+      if (d.requerentes.length === 1) {
+        const only = d.requerentes[0];
+        sel.value = only['1'] || only.nome || '';
+        document.getElementById('Email_Requerente').value = only['2'] || only.email || '';
       }
     }
+
+    if (!d.email_aprovador) {
+      statusEl.textContent = '⚠ Aprovador não encontrado para esta BU na aba CENTROS_CUSTO.';
+      statusEl.style.color = '#b07000';
+    } else if (!Array.isArray(d.requerentes) || d.requerentes.length === 0) {
+      statusEl.textContent = '⚠ Nenhum requerente cadastrado para esta BU na aba REQUERENTES.';
+      statusEl.style.color = '#b07000';
+    } else {
+      statusEl.textContent = '';
+    }
   } catch(e) {
-    console.warn('Lookup aprovador dinâmico falhou — usando fallback:', e);
+    console.warn('Lookup dinâmico de requerentes/aprovador falhou:', e);
+    sel.innerHTML = '<option value="">— erro ao buscar, tente selecionar a BU novamente —</option>';
+    statusEl.textContent = '⚠ Falha ao buscar requerente/aprovador. Selecione a Unidade de Negócio novamente.';
+    statusEl.style.color = '#c0392b';
   }
 }
 
@@ -665,12 +702,39 @@ function onCategoriaChange() {
     document.getElementById('Categoria_Superior').value = '';
     document.getElementById('Cat_Superior_N1').value = '';
     document.getElementById('Tipo_Despesa').value = '';
+    atualizarLinhaNFCartao('');
     return;
   }
   const parts = val.split('|');
   document.getElementById('Categoria_Superior').value = parts[1] || '';
   document.getElementById('Cat_Superior_N1').value = parts[2] || '';
   document.getElementById('Tipo_Despesa').value = parts[3] || '';
+  atualizarLinhaNFCartao(parts[3] || '');
+}
+
+// "Emissão de NF" aparece só para Categoria do tipo Receita; "Cobrança por Cartão" aparece só
+// para Categoria do tipo Despesa — são mutuamente exclusivos, nunca os dois ao mesmo tempo.
+// Ao esconder um campo, seu valor volta para NÃO (evita enviar SIM residual de uma Categoria
+// selecionada antes e depois trocada para o outro tipo).
+function atualizarLinhaNFCartao(tipo) {
+  const isReceita = tipo === 'Receita';
+  const isDespesa = tipo === 'Despesa';
+
+  document.getElementById('row-nf').style.display = isReceita ? 'table-row' : 'none';
+  if (!isReceita) document.getElementById('Emissao_NF').value = 'NÃO';
+
+  document.getElementById('row-cartao').style.display = isDespesa ? 'table-row' : 'none';
+  if (!isDespesa) document.getElementById('Recebido_Cartao').value = 'NÃO';
+}
+
+// ══ DATA VENCIMENTO → MÍNIMO DE 2 DIAS DA DATA CORRENTE ══════
+// O mínimo permitido para Data 1º Vencimento é hoje + 2 dias (data corrente),
+// não a Data de Competência. Campo começa em branco (ver init()).
+function atualizarMinVencimento() {
+  const minVenc = new Date();
+  minVenc.setDate(minVenc.getDate() + 2);
+  const minVencStr = minVenc.toISOString().split('T')[0];
+  document.getElementById('Data_Vencimento').min = minVencStr;
 }
 
 // ══ TIPO PAGAMENTO → PARCELAMENTO ════════════════════════════
@@ -821,6 +885,7 @@ async function buscarPorNomeFantasia() {
   const nomeFantasia = document.getElementById('Nome_Fantasia').value.trim();
   if (!nomeFantasia) return;
 
+  esconderSugestaoFuzzy();
   setFornecedorStatus('pendente', '⏳ Buscando por Nome Fantasia...', '#666');
 
   let found = false;
@@ -845,12 +910,181 @@ async function buscarPorNomeFantasia() {
   }
 
   if (!found) {
-    // SITUAÇÃO 3b: não encontrado → avisa, não bloqueia
+    // SITUAÇÃO 3b: não encontrado na busca exata → tenta busca aproximada (fuzzy)
+    // antes de assumir que é fornecedor novo (item 6 — nunca autopreenche, só sugere).
+    salvarFornecedor = true;
     setFornecedorStatus('novo',
       '⚠ Nome Fantasia não encontrado na base. Será gravado ao submeter.',
       '#b07000');
-    salvarFornecedor = true;
+
+    const candidatos = await buscarCandidatosFornecedor(nomeFantasia);
+    if (candidatos.length > 0) {
+      renderSugestoesFuzzy(candidatos, nomeFantasia);
+    }
   }
+}
+
+// ══ ITEM 6: busca aproximada (fuzzy) client-side ═════════════
+// Usada como fallback quando a busca exata (case-insensitive) no Make não encontra nada.
+// Nunca autopreenche — só sugere; o usuário confirma clicando "Usar este".
+let _fornecedoresCachePromise = null;
+
+function normalizarTexto(s) {
+  return (s || '')
+    .toString()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '') // remove acentos
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, ' ');
+}
+
+// Distância de Levenshtein padrão (programação dinâmica)
+function levenshtein(a, b) {
+  if (a === b) return 0;
+  if (!a.length) return b.length;
+  if (!b.length) return a.length;
+  const dp = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
+  for (let j = 0; j <= b.length; j++) dp[0][j] = j;
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      dp[i][j] = a[i-1] === b[j-1]
+        ? dp[i-1][j-1]
+        : 1 + Math.min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1]);
+    }
+  }
+  return dp[a.length][b.length];
+}
+
+// Similaridade normalizada 0..1 (1 = idêntico)
+function similaridade(a, b) {
+  const na = normalizarTexto(a), nb = normalizarTexto(b);
+  if (!na || !nb) return 0;
+  const dist = levenshtein(na, nb);
+  return 1 - dist / Math.max(na.length, nb.length);
+}
+
+// Busca (uma vez) a lista completa de FORNECEDORES_CLIENTES via o webhook "Listar Fornecedores"
+async function carregarFornecedoresCache() {
+  if (_fornecedoresCachePromise) return _fornecedoresCachePromise;
+  _fornecedoresCachePromise = (async () => {
+    try {
+      const r = await fetch(MAKE_LISTAR_FORNECEDORES_URL);
+      if (!r.ok) return [];
+      const d = await r.json();
+      const lista = Array.isArray(d.fornecedores) ? d.fornecedores : [];
+      // Chaves posicionais do Array Aggregator do Make: 1=CNPJ_CPF, 3=Razao_Social, 4=Nome_Fantasia, 5=Nome_extrato_cartao
+      return lista.map(f => ({
+        cnpj:    f['1'] || '',
+        razao:   f['3'] || '',
+        fantasia: f['4'] || '',
+        cartao:  f['5'] || ''
+      })).filter(f => f.razao || f.fantasia);
+    } catch(e) {
+      console.warn('carregarFornecedoresCache:', e);
+      return [];
+    }
+  })();
+  return _fornecedoresCachePromise;
+}
+
+// Retorna lista de candidatos (não exatos) que "contêm" o texto digitado (prefixo/trecho, tipo
+// autocomplete) OU são "parecidos" por Levenshtein (correção de typo). Combina os dois critérios
+// para não perder nem busca parcial (ex: "hias" → "HIAS GROUP") nem typo (ex: "HIAS GRUOP" → "HIAS GROUP").
+let _fuzzyCandidatos = [];
+
+async function buscarCandidatosFornecedor(nomeDigitado) {
+  const LIMIAR_FUZZY = 0.72;      // abaixo disso, considera "não parecido o suficiente"
+  const MIN_LEN_CONTAINS = 2;     // evita "contains" disparar com 1 caractere só
+  const nInput = normalizarTexto(nomeDigitado);
+  const lista = await carregarFornecedoresCache();
+  const candidatos = [];
+
+  for (const registro of lista) {
+    const nRazao    = normalizarTexto(registro.razao);
+    const nFantasia = normalizarTexto(registro.fantasia);
+
+    const ehExato = nRazao === nInput || nFantasia === nInput;
+    if (ehExato) continue; // já teria sido pego pela busca exata do Make
+
+    const contemRazao    = nInput.length >= MIN_LEN_CONTAINS && nRazao.includes(nInput);
+    const contemFantasia = nInput.length >= MIN_LEN_CONTAINS && nFantasia.includes(nInput);
+
+    if (contemRazao || contemFantasia) {
+      // "contains": prioriza o campo cujo tamanho é mais próximo do texto digitado
+      const tamanhoRef = contemFantasia && (!contemRazao || nFantasia.length <= nRazao.length)
+        ? nFantasia.length : nRazao.length;
+      candidatos.push({ registro, tipo: 'contains', score: 1, tamanhoRef });
+      continue;
+    }
+
+    const scoreRazao    = similaridade(nomeDigitado, registro.razao);
+    const scoreFantasia = similaridade(nomeDigitado, registro.fantasia);
+    const score = Math.max(scoreRazao, scoreFantasia);
+    if (score >= LIMIAR_FUZZY && score < 1) {
+      candidatos.push({ registro, tipo: 'fuzzy', score, tamanhoRef: 0 });
+    }
+  }
+
+  // "contains" primeiro (mais curtos/próximos ao texto digitado primeiro), depois "fuzzy" por score desc
+  candidatos.sort((a, b) => {
+    if (a.tipo !== b.tipo) return a.tipo === 'contains' ? -1 : 1;
+    if (a.tipo === 'contains') return a.tamanhoRef - b.tamanhoRef;
+    return b.score - a.score;
+  });
+
+  return candidatos.slice(0, 8); // limita a lista para não poluir a tela
+}
+
+function renderSugestoesFuzzy(candidatos, nomeDigitado) {
+  _fuzzyCandidatos = candidatos;
+  document.getElementById('fuzzy_suggestion_text').textContent =
+    `🔎 Encontramos ${candidatos.length} fornecedor(es) parecido(s) com "${nomeDigitado}". Selecione um ou informe que é novo:`;
+
+  const lista = document.getElementById('fuzzy_suggestion_list');
+  lista.innerHTML = '';
+  candidatos.forEach((c, idx) => {
+    const nomeExibido = c.registro.razao || c.registro.fantasia;
+    const detalhe = (c.registro.fantasia && c.registro.fantasia !== c.registro.razao) ? ` (${c.registro.fantasia})` : '';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-lookup';
+    btn.style.cssText = 'display:block;margin:3px 0;text-align:left;width:100%;';
+    btn.textContent = `✔ ${nomeExibido}${detalhe}`;
+    btn.onclick = () => aceitarSugestaoFuzzy(idx);
+    lista.appendChild(btn);
+  });
+
+  document.getElementById('fuzzy_suggestion_row').style.display = '';
+}
+
+function esconderSugestaoFuzzy() {
+  document.getElementById('fuzzy_suggestion_row').style.display = 'none';
+  document.getElementById('fuzzy_suggestion_text').textContent = '';
+  document.getElementById('fuzzy_suggestion_list').innerHTML = '';
+  _fuzzyCandidatos = [];
+}
+
+function aceitarSugestaoFuzzy(idx) {
+  const candidato = _fuzzyCandidatos[idx];
+  if (!candidato) return;
+  const registro = candidato.registro;
+  if (registro.cnpj) document.getElementById('CNPJ_CPF').value = registro.cnpj;
+  preencherCamposFornecedor({
+    razao_social:        registro.razao,
+    nome_fantasia:       registro.fantasia,
+    nome_extrato_cartao: registro.cartao
+  });
+  setFornecedorStatus('ok', '✔ Fornecedor confirmado pelo usuário (selecionado na lista)', '#2a7a2a');
+  salvarFornecedor = false;
+  esconderSugestaoFuzzy();
+}
+
+function rejeitarSugestaoFuzzy() {
+  esconderSugestaoFuzzy();
+  setFornecedorStatus('novo',
+    '⚠ Nome Fantasia não encontrado na base. Será gravado ao submeter.',
+    '#b07000');
+  salvarFornecedor = true;
 }
 
 // ══ VALIDAÇÃO ════════════════════════════════════════════════
@@ -888,14 +1122,14 @@ async function validar() {
     erros.push('CNPJ não encontrado na Receita Federal — corrija o número ou use apenas Nome Fantasia');
   }
 
-  // Garante que Email_Aprovador foi preenchido pelo onBUChange; se não, tenta o fallback
-  const buAtual = document.getElementById('BU_Centro_Custo').value;
-  if (!document.getElementById('Email_Aprovador').value && buAtual && APROVADORES[buAtual]) {
-    document.getElementById('Email_Aprovador').value = APROVADORES[buAtual].email;
-  }
+  // Email_Aprovador vem só da busca dinâmica (aba CENTROS_CUSTO) em onBUChange();
+  // sem fallback estático — se não veio, bloqueia o envio em vez de usar dado desatualizado.
   req('Email_Aprovador', 'E-mail do Aprovador não encontrado — selecione a BU novamente');
 
-  req('Razao_Social', 'Razão Social');
+  // Razão Social só obrigatória quando CNPJ (14 dígitos) for informado
+  if (cnpjRaw.length === 14) {
+    req('Razao_Social', 'Razão Social');
+  }
   req('Categoria_CA', 'Categoria CA');
   req('Descricao', 'Descrição');
   req('Data_Competencia', 'Data de Competência');
@@ -932,7 +1166,8 @@ function coletarDados() {
     BU_Centro_Custo:  g('BU_Centro_Custo'),
     Nome_Requerente:  g('Nome_Requerente'),
     Email_Requerente: g('Email_Requerente'),
-    Email_Aprovador:  g('Email_Aprovador') || (APROVADORES[g('BU_Centro_Custo')] ? APROVADORES[g('BU_Centro_Custo')].email : ''),
+    Email_Aprovador:  g('Email_Aprovador'),
+    Nome_Aprovador:   g('Nome_Aprovador'),
     CNPJ_CPF:         g('CNPJ_CPF').replace(/\D/g, ''),
     Razao_Social:     g('Razao_Social'),
     Nome_Fantasia:    g('Nome_Fantasia'),
@@ -943,6 +1178,34 @@ function coletarDados() {
     Categoria_Superior: g('Categoria_Superior'),
     Cat_Superior_N1:  g('Cat_Superior_N1'),
     Tipo_Despesa:     g('Tipo_Despesa'),
+    Emissao_NF:       g('Tipo_Despesa') === 'Receita' ? g('Emissao_NF') : 'NÃO',
+    Recebido_Cartao:  g('Tipo_Despesa') === 'Despesa' ? g('Recebido_Cartao') : 'NÃO',
+    // Email_Notificacao: calculado aqui (em vez de via if() no Make) para evitar bug do editor
+    // de fórmulas do Make — quando Emissão de NF = SIM, notifica a contabilidade em vez do aprovador da BU.
+    Email_Notificacao: (g('Tipo_Despesa') === 'Receita' && g('Emissao_NF') === 'SIM')
+                          ? 'claudia@rebels.cc' // e-mail da contabilidade (producao)
+                          : g('Email_Aprovador'),
+    // Textos condicionais de NF pré-calculados aqui (em vez de if() no Make) — o if() do Make
+    // se mostrou não-confiável para comparação de string (mesmo bug do Email_Notificacao acima,
+    // confirmado de novo em teste ponta a ponta em 2026-07-16): sempre resolve para o ramo "then"
+    // independente do valor real da condição. Os 4 textos abaixo são simples referências de campo
+    // no Make (sem função/if()), e os 3 usados em URL (Assunto_Resultado/Linha_Decisao/Label_*)
+    // já vêm URL-encoded para não quebrar a querystring dos links Aprovar/Rejeitar.
+    Assunto_Solicitacao: (g('Tipo_Despesa') === 'Receita' && g('Emissao_NF') === 'SIM')
+                          ? '[Rebels CA] Solicitação de Emissão de NF — '
+                          : '[Rebels CA] Nova Requisição para Aprovação — ',
+    Assunto_Resultado: encodeURIComponent((g('Tipo_Despesa') === 'Receita' && g('Emissao_NF') === 'SIM')
+                          ? '[Rebels CA] Retorno de Emissão de NF — '
+                          : '[Rebels CA] Resultado da Requisição — '),
+    Linha_Decisao: encodeURIComponent((g('Tipo_Despesa') === 'Receita' && g('Emissao_NF') === 'SIM')
+                          ? 'Emissão de NF de'
+                          : 'Decisão de'),
+    Label_Aprovado: encodeURIComponent((g('Tipo_Despesa') === 'Receita' && g('Emissao_NF') === 'SIM')
+                          ? 'NF emitida'
+                          : 'aprovado'),
+    Label_Rejeitado: encodeURIComponent((g('Tipo_Despesa') === 'Receita' && g('Emissao_NF') === 'SIM')
+                          ? 'NF não emitida'
+                          : 'rejeitado'),
     Descricao:        g('Descricao'),
     Numero_Documento: g('Numero_Documento'),
     Data_Competencia: g('Data_Competencia'),
