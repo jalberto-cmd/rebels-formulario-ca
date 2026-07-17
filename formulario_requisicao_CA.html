@@ -1183,7 +1183,7 @@ function coletarDados() {
     // Email_Notificacao: calculado aqui (em vez de via if() no Make) para evitar bug do editor
     // de fórmulas do Make — quando Emissão de NF = SIM, notifica a contabilidade em vez do aprovador da BU.
     Email_Notificacao: (g('Tipo_Despesa') === 'Receita' && g('Emissao_NF') === 'SIM')
-                          ? 'claudia@rebels.cc' // e-mail da contabilidade (producao)
+                          ? 'jalberto@rebels.cc' // e-mail da contabilidade (producao)
                           : g('Email_Aprovador'),
     // Textos condicionais de NF pré-calculados aqui (em vez de if() no Make) — o if() do Make
     // se mostrou não-confiável para comparação de string (mesmo bug do Email_Notificacao acima,
