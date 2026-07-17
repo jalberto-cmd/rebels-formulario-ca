@@ -417,9 +417,9 @@ table.impostos tr:last-child  td { background: #FFF2CC; }
         </tr>
         <tr id="row-parcelamento">
           <td class="lbl">Número de Parcelas <span class="req">*</span></td>
-          <td class="val"><input type="number" id="Num_Parcelas" step="1" min="2" placeholder="Ex.: 3"></td>
+          <td class="val" colspan="2"><input type="number" id="Num_Parcelas" step="1" min="2" placeholder="Ex.: 3"></td>
           <td class="lbl" id="lbl-nf-cad">Emissão de NF Cadenciada</td>
-          <td class="val" colspan="3" id="val-nf-cad">
+          <td class="val" colspan="2" id="val-nf-cad">
             <select id="NF_Cadenciada">
               <option value="NÃO">NÃO</option>
               <option value="SIM">SIM</option>
@@ -428,10 +428,9 @@ table.impostos tr:last-child  td { background: #FFF2CC; }
         </tr>
         <tr>
           <td class="lbl">Valor Bruto (R$) <span class="req">*</span></td>
-          <td class="val"><input type="number" id="Valor_Bruto" step="0.01" min="0" required placeholder="0,00"></td>
+          <td class="val" colspan="2"><input type="number" id="Valor_Bruto" step="0.01" min="0" required placeholder="0,00"></td>
           <td class="lbl">Valor Líquido (R$)</td>
-          <td class="val"><input type="number" id="Valor_Liquido" step="0.01" min="0" placeholder="0,00" oninput="onValorLiquidoChange()"></td>
-          <td class="lbl" colspan="2"></td>
+          <td class="val" colspan="2"><input type="number" id="Valor_Liquido" step="0.01" min="0" placeholder="0,00" oninput="onValorLiquidoChange()"></td>
         </tr>
       </table>
     </div>
@@ -591,6 +590,8 @@ function init() {
     salvarFornecedor = false;
     document.getElementById('cnpj_status').textContent = '';
   });
+
+  renumerarSecoes();
 }
 
 // ══ BU → REQUERENTES + APROVADOR ═════════════════════════════
@@ -746,6 +747,23 @@ function atualizarNFCadenciada() {
 function onValorLiquidoChange() {
   const val = document.getElementById('Valor_Liquido').value.trim();
   document.getElementById('sec-impostos').style.display = val ? 'block' : 'none';
+  renumerarSecoes();
+}
+
+// ══ RENUMERAR SEÇÕES (1., 2., 3. ...) ═════════════════════════
+// A seção "4. Retenções e Impostos" só aparece quando Valor Líquido é preenchido; sem essa
+// renumeração, quando ela fica oculta a próxima seção visível ("Observações") continuaria
+// rotulada "5." em vez de "4.", pulando um número. Renumera sequencialmente só as seções
+// com display diferente de "none" no momento, preservando o texto do título após o número.
+function renumerarSecoes() {
+  let n = 0;
+  document.querySelectorAll('.section').forEach(function(sec) {
+    const titulo = sec.querySelector('.section-title');
+    if (!titulo) return;
+    if (getComputedStyle(sec).display === 'none') return;
+    n++;
+    titulo.textContent = titulo.textContent.replace(/^\d+\./, n + '.');
+  });
 }
 
 // ══ TOTAL IMPOSTOS ═══════════════════════════════════════════
