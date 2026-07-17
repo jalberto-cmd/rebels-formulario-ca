@@ -1199,6 +1199,21 @@ function coletarDados() {
     // forma cadenciada (uma por parcela).
     Num_Parcelas:     g('Tipo_Pagamento') === 'Parcelado' ? (parseInt(g('Num_Parcelas'), 10) || '') : '',
     NF_Cadenciada:    g('Tipo_Pagamento') === 'Parcelado' ? g('NF_Cadenciada') : 'NÃO',
+    // Linha_Parcelamento: fragmento HTML pronto (mesmo padrão <tr> das outras linhas da tabela
+    // dos e-mails Gmail no Make) para inserir logo após a linha "Tipo de Pagamento". Calculado
+    // aqui em vez de via if() no Make, seguindo o mesmo padrão de Email_Notificacao/Assunto_*
+    // acima (o if() do Make não é confiável para comparação de string). Vazio quando não é
+    // Parcelado, então nenhuma linha extra aparece no e-mail. Quando NF_Cadenciada = SIM, o
+    // texto é destacado (ver decisão do usuário em 2026-07-17: "destacar quando a emissão de
+    // nota será cadenciada").
+    Linha_Parcelamento: g('Tipo_Pagamento') === 'Parcelado'
+      ? '<tr><td style="padding:8px;border:1px solid #ddd;background:#f5f5f5"><strong>Parcelamento</strong></td><td style="padding:8px;border:1px solid #ddd">Parcelado em ' +
+        (parseInt(g('Num_Parcelas'), 10) || '?') + 'x' +
+        (g('NF_Cadenciada') === 'SIM'
+          ? ' — <strong style="color:#B7791F;">NF Cadenciada (emitida por parcela)</strong>'
+          : '') +
+        '</td></tr>'
+      : '',
     ISS:      parseFloat(g('ISS')) || 0,
     PIS:      parseFloat(g('PIS')) || 0,
     COFINS:   parseFloat(g('COFINS')) || 0,
