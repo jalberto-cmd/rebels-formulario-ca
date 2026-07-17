@@ -137,6 +137,9 @@ table.impostos tr:last-child  td { background: #FFF2CC; }
 
 /* ── Parcelamento (linha condicional dentro da seção 3) ── */
 #row-parcelamento { display: none; }
+/* NF Cadenciada só aparece quando Tipo de Pagamento = Parcelado E Emissão de NF = SIM
+   (ver atualizarNFCadenciada()) — por padrão fica oculta mesmo com a linha visível. */
+#lbl-nf-cad, #val-nf-cad { display: none; }
 
 /* ── Aprovação (readonly) ── */
 #sec-aprovacao { display: none; }
@@ -367,7 +370,7 @@ table.impostos tr:last-child  td { background: #FFF2CC; }
         <tr id="row-nf" style="display:none">
           <td class="lbl">Emissão de NF</td>
           <td class="val" colspan="5">
-            <select id="Emissao_NF">
+            <select id="Emissao_NF" onchange="atualizarNFCadenciada()">
               <option value="NÃO">NÃO</option>
               <option value="SIM">SIM</option>
             </select>
@@ -415,8 +418,8 @@ table.impostos tr:last-child  td { background: #FFF2CC; }
         <tr id="row-parcelamento">
           <td class="lbl">Número de Parcelas <span class="req">*</span></td>
           <td class="val"><input type="number" id="Num_Parcelas" step="1" min="2" placeholder="Ex.: 3"></td>
-          <td class="lbl">Emissão de NF Cadenciada</td>
-          <td class="val" colspan="3">
+          <td class="lbl" id="lbl-nf-cad">Emissão de NF Cadenciada</td>
+          <td class="val" colspan="3" id="val-nf-cad">
             <select id="NF_Cadenciada">
               <option value="NÃO">NÃO</option>
               <option value="SIM">SIM</option>
@@ -567,6 +570,12 @@ function init() {
   document.getElementById('Data_Competencia').max = hoje;
   document.getElementById('Data_Competencia').value = hoje;
 
+  // Data de Competência começa na data corrente (acima); se o usuário alterar, o mínimo
+  // permitido é 90 dias atrás (não pode competir com um período mais antigo que isso).
+  const minCompetencia = new Date(now);
+  minCompetencia.setDate(minCompetencia.getDate() - 90);
+  document.getElementById('Data_Competencia').min = minCompetencia.toISOString().split('T')[0];
+
   // Data 1º Vencimento começa em branco; o mínimo permitido é hoje + 2 dias
   // (data corrente, não a Data de Competência) — ver atualizarMinVencimento().
   atualizarMinVencimento();
@@ -689,6 +698,10 @@ function atualizarLinhaNFCartao(tipo) {
 
   document.getElementById('row-cartao').style.display = isDespesa ? 'table-row' : 'none';
   if (!isDespesa) document.getElementById('Recebido_Cartao').value = 'NÃO';
+
+  // Categoria mudando de tipo pode ter zerado Emissao_NF (linha acima) — reavaliar
+  // se NF Cadenciada continua podendo ficar habilitada.
+  atualizarNFCadenciada();
 }
 
 // ══ DATA VENCIMENTO → MÍNIMO DE 2 DIAS DA DATA CORRENTE ══════
@@ -702,8 +715,9 @@ function atualizarMinVencimento() {
 }
 
 // ══ TIPO PAGAMENTO → PARCELAMENTO ════════════════════════════
-// Quando Parcelado, mostra Número de Parcelas + Emissão de NF Cadenciada.
-// Ao esconder (voltou para À Vista), limpa os valores para não enviar dado residual.
+// Quando Parcelado, mostra Número de Parcelas (+ Emissão de NF Cadenciada, se aplicável —
+// ver atualizarNFCadenciada()). Ao esconder (voltou para À Vista), limpa os valores para
+// não enviar dado residual.
 function onTipoPagamentoChange() {
   const tipo = document.getElementById('Tipo_Pagamento').value;
   const isParcelado = tipo === 'Parcelado';
@@ -712,6 +726,20 @@ function onTipoPagamentoChange() {
     document.getElementById('Num_Parcelas').value = '';
     document.getElementById('NF_Cadenciada').value = 'NÃO';
   }
+  atualizarNFCadenciada();
+}
+
+// ══ NF CADENCIADA → SÓ HABILITADA SE PARCELADO + EMISSÃO NF = SIM ═══════════
+// Regra de negócio: "Emissão de NF Cadenciada" só faz sentido quando a requisição é
+// parcelada E vai emitir Nota Fiscal (Emissão de NF = SIM). Nas demais combinações o
+// campo fica oculto e o valor é resetado para NÃO (evita enviar SIM residual).
+function atualizarNFCadenciada() {
+  const isParcelado = document.getElementById('Tipo_Pagamento').value === 'Parcelado';
+  const isEmissaoNF = document.getElementById('Emissao_NF').value === 'SIM';
+  const habilitado = isParcelado && isEmissaoNF;
+  document.getElementById('lbl-nf-cad').style.display = habilitado ? 'table-cell' : 'none';
+  document.getElementById('val-nf-cad').style.display = habilitado ? 'table-cell' : 'none';
+  if (!habilitado) document.getElementById('NF_Cadenciada').value = 'NÃO';
 }
 
 // ══ VALOR LÍQUIDO → MOSTRAR/OCULTAR IMPOSTOS ═════════════════
@@ -1285,6 +1313,8 @@ function resetForm() {
   if (!confirm('Limpar todos os campos?')) return;
   document.getElementById('form-req').reset();
   document.getElementById('row-parcelamento').style.display = 'none';
+  document.getElementById('lbl-nf-cad').style.display = 'none';
+  document.getElementById('val-nf-cad').style.display = 'none';
   document.getElementById('Total_Impostos').value = '0,00';
   document.getElementById('msg-success').style.display = 'none';
   document.getElementById('msg-error').style.display = 'none';
