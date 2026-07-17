@@ -1214,6 +1214,19 @@ function coletarDados() {
           : '') +
         '</td></tr>'
       : '',
+    // Linha_Parcelamento_URL: mesma linha acima, mas URL-encoded — para passar pelos links
+    // Aprovar/Rejeitar (query string) até o Cenário 3, seguindo o mesmo padrão já usado para
+    // Assunto_Resultado/Linha_Decisao/Label_Aprovado/Label_Rejeitado (ver comentário acima).
+    // O Cenário 3 recebe isso como {{1.linha_parcelamento}} (webhook normaliza para minúsculo)
+    // e usa direto no HTML do e-mail de confirmação, sem precisar reconstruir no Make.
+    Linha_Parcelamento_URL: encodeURIComponent(g('Tipo_Pagamento') === 'Parcelado'
+      ? '<tr><td style="padding:8px;border:1px solid #ddd;background:#f5f5f5"><strong>Parcelamento</strong></td><td style="padding:8px;border:1px solid #ddd">Parcelado em ' +
+        (parseInt(g('Num_Parcelas'), 10) || '?') + 'x' +
+        (g('NF_Cadenciada') === 'SIM'
+          ? ' — <strong style="color:#B7791F;">NF Cadenciada (emitida por parcela)</strong>'
+          : '') +
+        '</td></tr>'
+      : ''),
     ISS:      parseFloat(g('ISS')) || 0,
     PIS:      parseFloat(g('PIS')) || 0,
     COFINS:   parseFloat(g('COFINS')) || 0,
