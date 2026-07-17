@@ -1190,8 +1190,13 @@ function coletarDados() {
     Valor_Liquido:    parseFloat(g('Valor_Liquido')) || parseFloat(g('Valor_Bruto')) || 0,
     Tipo_Pagamento:   g('Tipo_Pagamento'),
     Data_Vencimento:  g('Data_Vencimento'),
-    // Parcelamento simplificado (2026-07-17): não rastreamos mais data de vencimento por parcela —
-    // só a quantidade de parcelas e se a NF será emitida de forma cadenciada (uma por parcela).
+    // Venc_Parcela_1 continua alimentado pela Data 1º Vencimento (única data mantida no formulário
+    // — ver decisão do usuário em 2026-07-17). O Make ainda mapeia REQUICOES!Venc_Parcela_1 a partir
+    // deste campo do payload, então ele precisa continuar sendo enviado mesmo sem a seção 4.
+    Venc_Parcela_1:   g('Data_Vencimento'),
+    // Parcelamento simplificado (2026-07-17): não rastreamos mais data de vencimento por parcela
+    // (Venc_Parcela_2..12 foram removidas) — só a quantidade de parcelas e se a NF será emitida de
+    // forma cadenciada (uma por parcela).
     Num_Parcelas:     g('Tipo_Pagamento') === 'Parcelado' ? (parseInt(g('Num_Parcelas'), 10) || '') : '',
     NF_Cadenciada:    g('Tipo_Pagamento') === 'Parcelado' ? g('NF_Cadenciada') : 'NÃO',
     ISS:      parseFloat(g('ISS')) || 0,
