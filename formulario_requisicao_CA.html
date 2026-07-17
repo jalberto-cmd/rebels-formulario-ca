@@ -135,19 +135,8 @@ table.impostos td .imp-label {
 table.impostos tr:first-child td { background: #FFF8F0; }
 table.impostos tr:last-child  td { background: #FFF2CC; }
 
-/* ── Parcelas ── */
-#sec-parcelamento { display: none; }
-table.parcelas { width: 100%; border-collapse: collapse; }
-table.parcelas th {
-  background: #BDD7EE; color: #1F3864; font-size: 10px;
-  font-weight: bold; padding: 4px 8px; border: 1px solid #AAAAAA; text-align: center;
-}
-table.parcelas td {
-  padding: 4px 8px; border: 1px solid #CCCCCC; text-align: center; font-size: 11px;
-}
-table.parcelas td.num { background: #F2F2F2; font-weight: bold; color: #1F3864; width: 40px; }
-.parc-row { display: none; }
-.parc-row.visible { display: table-row; }
+/* ── Parcelamento (linha condicional dentro da seção 3) ── */
+#row-parcelamento { display: none; }
 
 /* ── Aprovação (readonly) ── */
 #sec-aprovacao { display: none; }
@@ -423,6 +412,17 @@ table.parcelas td.num { background: #F2F2F2; font-weight: bold; color: #1F3864; 
           <td class="lbl">Data 1º Vencimento <span class="req">*</span></td>
           <td class="val" colspan="2"><input type="date" id="Data_Vencimento" required></td>
         </tr>
+        <tr id="row-parcelamento">
+          <td class="lbl">Número de Parcelas <span class="req">*</span></td>
+          <td class="val"><input type="number" id="Num_Parcelas" step="1" min="2" placeholder="Ex.: 3"></td>
+          <td class="lbl">Emissão de NF Cadenciada</td>
+          <td class="val" colspan="3">
+            <select id="NF_Cadenciada">
+              <option value="NÃO">NÃO</option>
+              <option value="SIM">SIM</option>
+            </select>
+          </td>
+        </tr>
         <tr>
           <td class="lbl">Valor Bruto (R$) <span class="req">*</span></td>
           <td class="val"><input type="number" id="Valor_Bruto" step="0.01" min="0" required placeholder="0,00"></td>
@@ -433,45 +433,9 @@ table.parcelas td.num { background: #F2F2F2; font-weight: bold; color: #1F3864; 
       </table>
     </div>
 
-    <!-- ══ 4. PARCELAMENTO (condicional) ══════════════════════ -->
-    <div class="section" id="sec-parcelamento">
-      <div class="section-title">4. Parcelamento</div>
-      <table class="parcelas">
-        <tr>
-          <th style="width:40px">Parc.</th>
-          <th>Vencimento</th>
-          <th style="width:40px">Parc.</th>
-          <th>Vencimento</th>
-          <th style="width:40px">Parc.</th>
-          <th>Vencimento</th>
-        </tr>
-        <tr class="parc-row visible" id="pr-1-3">
-          <td class="num">1ª</td><td><input type="date" id="Venc_Parcela_1"></td>
-          <td class="num">2ª</td><td><input type="date" id="Venc_Parcela_2"></td>
-          <td class="num">3ª</td><td><input type="date" id="Venc_Parcela_3"></td>
-        </tr>
-        <tr class="parc-row" id="pr-4-6">
-          <td class="num">4ª</td><td><input type="date" id="Venc_Parcela_4"></td>
-          <td class="num">5ª</td><td><input type="date" id="Venc_Parcela_5"></td>
-          <td class="num">6ª</td><td><input type="date" id="Venc_Parcela_6"></td>
-        </tr>
-        <tr class="parc-row" id="pr-7-9">
-          <td class="num">7ª</td><td><input type="date" id="Venc_Parcela_7"></td>
-          <td class="num">8ª</td><td><input type="date" id="Venc_Parcela_8"></td>
-          <td class="num">9ª</td><td><input type="date" id="Venc_Parcela_9"></td>
-        </tr>
-        <tr class="parc-row" id="pr-10-12">
-          <td class="num">10ª</td><td><input type="date" id="Venc_Parcela_10"></td>
-          <td class="num">11ª</td><td><input type="date" id="Venc_Parcela_11"></td>
-          <td class="num">12ª</td><td><input type="date" id="Venc_Parcela_12"></td>
-        </tr>
-      </table>
-      <p style="font-size:10px;color:#888;margin-top:4px;padding-left:4px;">Preencha apenas as parcelas utilizadas.</p>
-    </div>
-
-    <!-- ══ 5. RETENÇÕES E IMPOSTOS ════════════════════════════ -->
+    <!-- ══ 4. RETENÇÕES E IMPOSTOS ════════════════════════════ -->
     <div class="section" id="sec-impostos" style="display:none">
-      <div class="section-title">5. Retenções e Impostos</div>
+      <div class="section-title">4. Retenções e Impostos</div>
       <table class="impostos">
         <tr>
           <td>
@@ -512,9 +476,9 @@ table.parcelas td.num { background: #F2F2F2; font-weight: bold; color: #1F3864; 
       </table>
     </div>
 
-    <!-- ══ 6. OBSERVAÇÕES ══════════════════════════════════════ -->
+    <!-- ══ 5. OBSERVAÇÕES ══════════════════════════════════════ -->
     <div class="section">
-      <div class="section-title">6. Observações</div>
+      <div class="section-title">5. Observações</div>
       <table class="fields">
         <tr>
           <td class="val" style="padding:8px;">
@@ -524,9 +488,9 @@ table.parcelas td.num { background: #F2F2F2; font-weight: bold; color: #1F3864; 
       </table>
     </div>
 
-    <!-- ══ 7. APROVAÇÃO (readonly — preenchido pelo aprovador) ══ -->
+    <!-- ══ 6. APROVAÇÃO (readonly — preenchido pelo aprovador) ══ -->
     <div class="section" id="sec-aprovacao">
-      <div class="section-title">7. Aprovação</div>
+      <div class="section-title">6. Aprovação</div>
       <table class="fields">
         <tr>
           <td class="lbl">Aprovador</td>
@@ -738,10 +702,16 @@ function atualizarMinVencimento() {
 }
 
 // ══ TIPO PAGAMENTO → PARCELAMENTO ════════════════════════════
+// Quando Parcelado, mostra Número de Parcelas + Emissão de NF Cadenciada.
+// Ao esconder (voltou para À Vista), limpa os valores para não enviar dado residual.
 function onTipoPagamentoChange() {
   const tipo = document.getElementById('Tipo_Pagamento').value;
-  document.getElementById('sec-parcelamento').style.display =
-    tipo === 'Parcelado' ? 'block' : 'none';
+  const isParcelado = tipo === 'Parcelado';
+  document.getElementById('row-parcelamento').style.display = isParcelado ? 'table-row' : 'none';
+  if (!isParcelado) {
+    document.getElementById('Num_Parcelas').value = '';
+    document.getElementById('NF_Cadenciada').value = 'NÃO';
+  }
 }
 
 // ══ VALOR LÍQUIDO → MOSTRAR/OCULTAR IMPOSTOS ═════════════════
@@ -1137,6 +1107,13 @@ async function validar() {
   req('Tipo_Pagamento', 'Tipo de Pagamento');
   req('Data_Vencimento', 'Data 1º Vencimento');
 
+  if (document.getElementById('Tipo_Pagamento').value === 'Parcelado') {
+    const numParcelas = parseInt(document.getElementById('Num_Parcelas').value, 10);
+    if (!numParcelas || numParcelas < 2) {
+      erros.push('Número de Parcelas (mínimo 2, quando Tipo de Pagamento = Parcelado)');
+    }
+  }
+
   const dc = document.getElementById('Data_Competencia').value;
   if (dc) {
     const hoje = new Date().toISOString().split('T')[0];
@@ -1183,7 +1160,7 @@ function coletarDados() {
     // Email_Notificacao: calculado aqui (em vez de via if() no Make) para evitar bug do editor
     // de fórmulas do Make — quando Emissão de NF = SIM, notifica a contabilidade em vez do aprovador da BU.
     Email_Notificacao: (g('Tipo_Despesa') === 'Receita' && g('Emissao_NF') === 'SIM')
-                          ? 'jalberto@rebels.cc' // e-mail da contabilidade (producao)
+                          ? 'claudia@rebels.cc' // e-mail da contabilidade (producao)
                           : g('Email_Aprovador'),
     // Textos condicionais de NF pré-calculados aqui (em vez de if() no Make) — o if() do Make
     // se mostrou não-confiável para comparação de string (mesmo bug do Email_Notificacao acima,
@@ -1213,18 +1190,10 @@ function coletarDados() {
     Valor_Liquido:    parseFloat(g('Valor_Liquido')) || parseFloat(g('Valor_Bruto')) || 0,
     Tipo_Pagamento:   g('Tipo_Pagamento'),
     Data_Vencimento:  g('Data_Vencimento'),
-    Venc_Parcela_1:   g('Tipo_Pagamento') === 'À Vista' ? g('Data_Vencimento') : g('Venc_Parcela_1'),
-    Venc_Parcela_2:   g('Venc_Parcela_2'),
-    Venc_Parcela_3:   g('Venc_Parcela_3'),
-    Venc_Parcela_4:   g('Venc_Parcela_4'),
-    Venc_Parcela_5:   g('Venc_Parcela_5'),
-    Venc_Parcela_6:   g('Venc_Parcela_6'),
-    Venc_Parcela_7:   g('Venc_Parcela_7'),
-    Venc_Parcela_8:   g('Venc_Parcela_8'),
-    Venc_Parcela_9:   g('Venc_Parcela_9'),
-    Venc_Parcela_10:  g('Venc_Parcela_10'),
-    Venc_Parcela_11:  g('Venc_Parcela_11'),
-    Venc_Parcela_12:  g('Venc_Parcela_12'),
+    // Parcelamento simplificado (2026-07-17): não rastreamos mais data de vencimento por parcela —
+    // só a quantidade de parcelas e se a NF será emitida de forma cadenciada (uma por parcela).
+    Num_Parcelas:     g('Tipo_Pagamento') === 'Parcelado' ? (parseInt(g('Num_Parcelas'), 10) || '') : '',
+    NF_Cadenciada:    g('Tipo_Pagamento') === 'Parcelado' ? g('NF_Cadenciada') : 'NÃO',
     ISS:      parseFloat(g('ISS')) || 0,
     PIS:      parseFloat(g('PIS')) || 0,
     COFINS:   parseFloat(g('COFINS')) || 0,
@@ -1282,7 +1251,7 @@ document.getElementById('form-req').addEventListener('submit', async function(e)
 function resetForm() {
   if (!confirm('Limpar todos os campos?')) return;
   document.getElementById('form-req').reset();
-  document.getElementById('sec-parcelamento').style.display = 'none';
+  document.getElementById('row-parcelamento').style.display = 'none';
   document.getElementById('Total_Impostos').value = '0,00';
   document.getElementById('msg-success').style.display = 'none';
   document.getElementById('msg-error').style.display = 'none';
