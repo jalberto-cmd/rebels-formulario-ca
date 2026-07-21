@@ -394,7 +394,7 @@ table.impostos tr:last-child  td { background: #FFF2CC; }
           <td class="val readonly"><input type="text" id="Tipo_Despesa" class="readonly-input" readonly placeholder="Automático"></td>
         </tr>
         <tr>
-          <td class="lbl">Descrição <span class="req">*</span></td>
+          <td class="lbl">Serviço Prestado <span class="req">*</span></td>
           <td class="val" colspan="5"><textarea id="Descricao" required placeholder="Descreva o motivo ou detalhes do lançamento"></textarea></td>
         </tr>
         <tr>
@@ -507,6 +507,12 @@ table.impostos tr:last-child  td { background: #FFF2CC; }
           <td class="val readonly"><input type="text" id="Motivo_Rejeicao" class="readonly-input" readonly></td>
         </tr>
       </table>
+    </div>
+
+    <!-- ══ RODAPÉ — ORIENTAÇÕES DE PREENCHIMENTO ══════════════════ -->
+    <div class="section" style="background:#fff8e1;border:1px solid #ffcc80;border-radius:6px;padding:10px 14px;font-size:12px;color:#666;margin-bottom:14px;">
+      <strong style="color:#b07000;">⚠ Orientação de preenchimento — Nome Fantasia:</strong>
+      Quando se tratar de prestador de serviço (pessoa física), informe no campo <strong>Nome Fantasia</strong>: Nome, Unidade de Negócio e Função.
     </div>
 
     <!-- ══ ENVIO ═══════════════════════════════════════════════ -->
@@ -1147,7 +1153,7 @@ async function validar() {
     req('Razao_Social', 'Razão Social');
   }
   req('Categoria_CA', 'Categoria CA');
-  req('Descricao', 'Descrição');
+  req('Descricao', 'Serviço Prestado');
   req('Data_Competencia', 'Data de Competência');
   req('Valor_Bruto', 'Valor Bruto');
   req('Tipo_Pagamento', 'Tipo de Pagamento');
