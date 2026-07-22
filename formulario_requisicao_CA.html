@@ -376,15 +376,6 @@ table.impostos tr:last-child  td { background: #FFF2CC; }
             </select>
           </td>
         </tr>
-        <tr id="row-cartao" style="display:none">
-          <td class="lbl">Cobrança por Cartão</td>
-          <td class="val" colspan="5">
-            <select id="Recebido_Cartao">
-              <option value="NÃO">NÃO</option>
-              <option value="SIM">SIM</option>
-            </select>
-          </td>
-        </tr>
         <tr>
           <td class="lbl">Categoria Superior</td>
           <td class="val readonly"><input type="text" id="Categoria_Superior" class="readonly-input" readonly placeholder="Automático"></td>
@@ -396,7 +387,8 @@ table.impostos tr:last-child  td { background: #FFF2CC; }
         <tr>
           <td class="lbl">Serviço Prestado <span class="req">*</span></td>
           <td class="val" colspan="5"><textarea id="Descricao" required placeholder="Descreva o motivo ou detalhes do lançamento
-Quando se tratar de prestador de serviço (pessoa física), informe neste campo a Unidade de Negócio e a Função."></textarea></td>
+Quando se tratar de prestador de serviço (pessoa física), informe neste campo a Unidade de Negócio e a Função.
+** Texto deve ser curto **"></textarea></td>
         </tr>
         <tr>
           <td class="lbl">Nº Documento</td>
@@ -695,19 +687,14 @@ function onCategoriaChange() {
   atualizarLinhaNFCartao(parts[3] || '');
 }
 
-// "Emissão de NF" aparece só para Categoria do tipo Receita; "Cobrança por Cartão" aparece só
-// para Categoria do tipo Despesa — são mutuamente exclusivos, nunca os dois ao mesmo tempo.
-// Ao esconder um campo, seu valor volta para NÃO (evita enviar SIM residual de uma Categoria
-// selecionada antes e depois trocada para o outro tipo).
+// "Emissão de NF" aparece só para Categoria do tipo Receita. Ao esconder o campo, seu valor
+// volta para NÃO (evita enviar SIM residual de uma Categoria selecionada antes e depois
+// trocada para Despesa).
 function atualizarLinhaNFCartao(tipo) {
   const isReceita = tipo === 'Receita';
-  const isDespesa = tipo === 'Despesa';
 
   document.getElementById('row-nf').style.display = isReceita ? 'table-row' : 'none';
   if (!isReceita) document.getElementById('Emissao_NF').value = 'NÃO';
-
-  document.getElementById('row-cartao').style.display = isDespesa ? 'table-row' : 'none';
-  if (!isDespesa) document.getElementById('Recebido_Cartao').value = 'NÃO';
 
   // Categoria mudando de tipo pode ter zerado Emissao_NF (linha acima) — reavaliar
   // se NF Cadenciada continua podendo ficar habilitada.
@@ -1216,7 +1203,6 @@ function coletarDados() {
     Cat_Superior_N1:  g('Cat_Superior_N1'),
     Tipo_Despesa:     g('Tipo_Despesa'),
     Emissao_NF:       g('Tipo_Despesa') === 'Receita' ? g('Emissao_NF') : 'NÃO',
-    Recebido_Cartao:  g('Tipo_Despesa') === 'Despesa' ? g('Recebido_Cartao') : 'NÃO',
     // Email_Notificacao: calculado aqui (em vez de via if() no Make) para evitar bug do editor
     // de fórmulas do Make — quando Emissão de NF = SIM, notifica a contabilidade em vez do aprovador da BU.
     Email_Notificacao: (g('Tipo_Despesa') === 'Receita' && g('Emissao_NF') === 'SIM')
