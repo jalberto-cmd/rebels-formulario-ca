@@ -396,7 +396,7 @@ table.impostos tr:last-child  td { background: #FFF2CC; }
         <tr>
           <td class="lbl">Serviço Prestado <span class="req">*</span></td>
           <td class="val" colspan="5"><textarea id="Descricao" required placeholder="Descreva o motivo ou detalhes do lançamento
-Quando se tratar de prestador de serviço (pessoa física), informe neste campo o Nome, a Unidade de Negócio e a Função."></textarea></td>
+Quando se tratar de prestador de serviço (pessoa física), informe neste campo a Unidade de Negócio e a Função."></textarea></td>
         </tr>
         <tr>
           <td class="lbl">Nº Documento</td>
@@ -411,6 +411,8 @@ Quando se tratar de prestador de serviço (pessoa física), informe neste campo 
               <option value="">— selecione —</option>
               <option value="À Vista">À Vista</option>
               <option value="Parcelado">Parcelado</option>
+              <option value="Cartão à Vista">Cartão à Vista</option>
+              <option value="Cartão Parcelado">Cartão Parcelado</option>
             </select>
           </td>
           <td class="lbl">Data 1º Vencimento <span class="req">*</span></td>
@@ -726,9 +728,14 @@ function atualizarMinVencimento() {
 // Quando Parcelado, mostra Número de Parcelas (+ Emissão de NF Cadenciada, se aplicável —
 // ver atualizarNFCadenciada()). Ao esconder (voltou para À Vista), limpa os valores para
 // não enviar dado residual.
+// "Cartão à Vista" e "Cartão Parcelado" se comportam exatamente como "À Vista" e "Parcelado"
+// respectivamente — isTipoParcelado() centraliza essa equivalência para todo o formulário.
+function isTipoParcelado(tipo) {
+  return tipo === 'Parcelado' || tipo === 'Cartão Parcelado';
+}
 function onTipoPagamentoChange() {
   const tipo = document.getElementById('Tipo_Pagamento').value;
-  const isParcelado = tipo === 'Parcelado';
+  const isParcelado = isTipoParcelado(tipo);
   document.getElementById('row-parcelamento').style.display = isParcelado ? 'table-row' : 'none';
   if (!isParcelado) {
     document.getElementById('Num_Parcelas').value = '';
@@ -742,7 +749,7 @@ function onTipoPagamentoChange() {
 // parcelada E vai emitir Nota Fiscal (Emissão de NF = SIM). Nas demais combinações o
 // campo fica oculto e o valor é resetado para NÃO (evita enviar SIM residual).
 function atualizarNFCadenciada() {
-  const isParcelado = document.getElementById('Tipo_Pagamento').value === 'Parcelado';
+  const isParcelado = isTipoParcelado(document.getElementById('Tipo_Pagamento').value);
   const isEmissaoNF = document.getElementById('Emissao_NF').value === 'SIM';
   const habilitado = isParcelado && isEmissaoNF;
   document.getElementById('lbl-nf-cad').style.display = habilitado ? 'table-cell' : 'none';
@@ -1160,7 +1167,7 @@ async function validar() {
   req('Tipo_Pagamento', 'Tipo de Pagamento');
   req('Data_Vencimento', 'Data 1º Vencimento');
 
-  if (document.getElementById('Tipo_Pagamento').value === 'Parcelado') {
+  if (isTipoParcelado(document.getElementById('Tipo_Pagamento').value)) {
     const numParcelas = parseInt(document.getElementById('Num_Parcelas').value, 10);
     if (!numParcelas || numParcelas < 2) {
       erros.push('Número de Parcelas (mínimo 2, quando Tipo de Pagamento = Parcelado)');
@@ -1250,8 +1257,8 @@ function coletarDados() {
     // Parcelamento simplificado (2026-07-17): não rastreamos mais data de vencimento por parcela
     // (Venc_Parcela_2..12 foram removidas) — só a quantidade de parcelas e se a NF será emitida de
     // forma cadenciada (uma por parcela).
-    Num_Parcelas:     g('Tipo_Pagamento') === 'Parcelado' ? (parseInt(g('Num_Parcelas'), 10) || '') : '',
-    NF_Cadenciada:    g('Tipo_Pagamento') === 'Parcelado' ? g('NF_Cadenciada') : 'NÃO',
+    Num_Parcelas:     isTipoParcelado(g('Tipo_Pagamento')) ? (parseInt(g('Num_Parcelas'), 10) || '') : '',
+    NF_Cadenciada:    isTipoParcelado(g('Tipo_Pagamento')) ? g('NF_Cadenciada') : 'NÃO',
     // Linha_Parcelamento: fragmento HTML pronto (mesmo padrão <tr> das outras linhas da tabela
     // dos e-mails Gmail no Make) para inserir logo após a linha "Tipo de Pagamento". Calculado
     // aqui em vez de via if() no Make, seguindo o mesmo padrão de Email_Notificacao/Assunto_*
@@ -1259,7 +1266,7 @@ function coletarDados() {
     // Parcelado, então nenhuma linha extra aparece no e-mail. Quando NF_Cadenciada = SIM, o
     // texto é destacado (ver decisão do usuário em 2026-07-17: "destacar quando a emissão de
     // nota será cadenciada").
-    Linha_Parcelamento: g('Tipo_Pagamento') === 'Parcelado'
+    Linha_Parcelamento: isTipoParcelado(g('Tipo_Pagamento'))
       ? '<tr><td style="padding:8px;border:1px solid #ddd;background:#f5f5f5"><strong>Parcelamento</strong></td><td style="padding:8px;border:1px solid #ddd">Parcelado em ' +
         (parseInt(g('Num_Parcelas'), 10) || '?') + 'x' +
         (g('NF_Cadenciada') === 'SIM'
@@ -1272,7 +1279,7 @@ function coletarDados() {
     // Assunto_Resultado/Linha_Decisao/Label_Aprovado/Label_Rejeitado (ver comentário acima).
     // O Cenário 3 recebe isso como {{1.linha_parcelamento}} (webhook normaliza para minúsculo)
     // e usa direto no HTML do e-mail de confirmação, sem precisar reconstruir no Make.
-    Linha_Parcelamento_URL: encodeURIComponent(g('Tipo_Pagamento') === 'Parcelado'
+    Linha_Parcelamento_URL: encodeURIComponent(isTipoParcelado(g('Tipo_Pagamento'))
       ? '<tr><td style="padding:8px;border:1px solid #ddd;background:#f5f5f5"><strong>Parcelamento</strong></td><td style="padding:8px;border:1px solid #ddd">Parcelado em ' +
         (parseInt(g('Num_Parcelas'), 10) || '?') + 'x' +
         (g('NF_Cadenciada') === 'SIM'
