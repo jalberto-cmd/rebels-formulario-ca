@@ -239,18 +239,18 @@ table.impostos tr:last-child  td { background: #FFF2CC; }
       <div class="section-title">2. Fornecedor / Cliente</div>
       <table class="fields">
         <tr>
-          <td class="lbl">CNPJ / CPF <span class="req">*</span></td>
+          <td class="lbl">CNPJ / CPF</td>
           <td class="val" colspan="5">
             <div class="cnpj-row">
-              <input type="text" id="CNPJ_CPF" placeholder="00.000.000/0000-00 ou 000.000.000-00" required oninput="formatCNPJ(this)" onblur="onBlurCNPJ(this)" maxlength="18">
+              <input type="text" id="CNPJ_CPF" placeholder="00.000.000/0000-00 ou 000.000.000-00" oninput="formatCNPJ(this)" onblur="onBlurCNPJ(this)" maxlength="18">
               <button type="button" class="btn-lookup" onclick="buscarCNPJ()">🔍 Buscar</button>
             </div>
             <div class="cnpj-status" id="cnpj_status"></div>
           </td>
         </tr>
         <tr>
-          <td class="lbl">Nome Fantasia</td>
-          <td class="val" colspan="2"><input type="text" id="Nome_Fantasia" onblur="buscarPorNomeFantasia()"></td>
+          <td class="lbl">Nome Fantasia <span class="req">*</span></td>
+          <td class="val" colspan="2"><input type="text" id="Nome_Fantasia" required onblur="buscarPorNomeFantasia()"></td>
           <td class="lbl">Nome Extrato Cartão</td>
           <td class="val" colspan="2"><input type="text" id="Nome_extrato_Cartao"></td>
         </tr>
@@ -1101,12 +1101,16 @@ async function validar() {
   req('Nome_Requerente', 'Requerente');
 
   // ── Validação do bloco Fornecedor/Cliente ──────────────────
+  // Nome Fantasia agora é sempre obrigatório (2026-07-29) — CNPJ/CPF passou a ser opcional.
+  // Motivo: um Nome Fantasia vazio no formulário podia colidir com outra linha igualmente vazia
+  // em FORNECEDORES_CLIENTES na busca por match exato do Cenário 2, fazendo o sistema reaproveitar
+  // por engano o ID_FornCli de um fornecedor completamente diferente (ver lição #22 do projeto).
   const cnpjRaw = document.getElementById('CNPJ_CPF').value.replace(/\D/g,'');
   const nfVal   = document.getElementById('Nome_Fantasia').value.trim();
 
-  if (!cnpjRaw && !nfVal) {
-    erros.push('CNPJ / CPF ou Nome Fantasia (ao menos um é obrigatório)');
-  } else if (cnpjRaw.length > 0 && cnpjRaw.length !== 11 && cnpjRaw.length !== 14) {
+  req('Nome_Fantasia', 'Nome Fantasia');
+
+  if (cnpjRaw.length > 0 && cnpjRaw.length !== 11 && cnpjRaw.length !== 14) {
     erros.push('CNPJ / CPF inválido — deve ter 11 (CPF) ou 14 (CNPJ) dígitos');
   } else if (fornecedorStatus === 'pendente') {
     // Busca ainda não foi disparada — dispara agora e aguarda
