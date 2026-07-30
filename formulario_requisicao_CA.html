@@ -384,7 +384,7 @@ table.impostos tr:last-child  td { background: #FFF2CC; }
         <tr>
           <td class="lbl">Serviço Prestado <span class="req">*</span></td>
           <td class="val" colspan="5"><textarea id="Descricao" required placeholder="Descreva o motivo ou detalhes do lançamento
-Quando se tratar de prestador de serviço (pessoa física), informe neste campo a Unidade de Negócio e a Função.
+Especifique a Chave PIX
 ** Texto deve ser curto **"></textarea></td>
         </tr>
         <tr>
@@ -559,14 +559,17 @@ function init() {
   document.getElementById('display-data').textContent = 'Criado em: ' + dataStr;
 
   const hoje = now.toISOString().split('T')[0];
-  document.getElementById('Data_Competencia').max = hoje;
   document.getElementById('Data_Competencia').value = hoje;
 
-  // Data de Competência começa na data corrente (acima); se o usuário alterar, o mínimo
-  // permitido é 90 dias atrás (não pode competir com um período mais antigo que isso).
+  // Data de Competência começa na data corrente (acima); o intervalo permitido vai de
+  // 90 dias atrás até 45 dias à frente de hoje.
   const minCompetencia = new Date(now);
   minCompetencia.setDate(minCompetencia.getDate() - 90);
   document.getElementById('Data_Competencia').min = minCompetencia.toISOString().split('T')[0];
+
+  const maxCompetencia = new Date(now);
+  maxCompetencia.setDate(maxCompetencia.getDate() + 45);
+  document.getElementById('Data_Competencia').max = maxCompetencia.toISOString().split('T')[0];
 
   // Data 1º Vencimento começa em branco; o mínimo permitido é hoje + 2 dias
   // (data corrente, não a Data de Competência) — ver atualizarMinVencimento().
@@ -1169,8 +1172,12 @@ async function validar() {
 
   const dc = document.getElementById('Data_Competencia').value;
   if (dc) {
-    const hoje = new Date().toISOString().split('T')[0];
-    if (dc > hoje) erros.push('Data de Competência deve ser igual ou anterior à data atual');
+    const agora = new Date();
+    const minDc = new Date(agora); minDc.setDate(minDc.getDate() - 90);
+    const maxDc = new Date(agora); maxDc.setDate(maxDc.getDate() + 45);
+    const minDcStr = minDc.toISOString().split('T')[0];
+    const maxDcStr = maxDc.toISOString().split('T')[0];
+    if (dc < minDcStr || dc > maxDcStr) erros.push('Data de Competência deve estar entre ' + minDcStr.split('-').reverse().join('/') + ' e ' + maxDcStr.split('-').reverse().join('/'));
   }
 
   const dv = document.getElementById('Data_Vencimento').value;
