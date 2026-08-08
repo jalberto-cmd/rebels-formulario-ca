@@ -1308,6 +1308,14 @@ function coletarDados() {
     Label_Rejeitado: encodeURIComponent((g('Tipo_Despesa') === 'Receita' && g('Emissao_NF') === 'SIM')
                           ? 'NF não emitida'
                           : 'rejeitado'),
+    // Texto_Botao_Aprovar/Texto_Botao_Rejeitar: rótulo dos 2 botões do e-mail de solicitação
+    // (módulo 12 do Cenário 2). Vão direto no corpo JSON (não em URL) — sem encodeURIComponent.
+    // Is_Emissao_NF_Ativa: flag simples repassada via query string (por isso encoded) para a
+    // página intermediária de rejeição (formulario_rejeicao.html) adaptar o texto quando o botão
+    // "Solicitar mais informação" for clicado num contexto de emissão de NF.
+    Texto_Botao_Aprovar: isEmissaoNFAtiva() ? '✅ Confirmar emissão da NF' : '✅ APROVAR',
+    Texto_Botao_Rejeitar: isEmissaoNFAtiva() ? '❌ Solicitar mais informação' : '❌ REJEITAR',
+    Is_Emissao_NF_Ativa: encodeURIComponent(isEmissaoNFAtiva() ? 'true' : 'false'),
     Descricao:        g('Descricao'),
     Numero_Documento: g('Numero_Documento'),
     Data_Competencia: g('Data_Competencia'),
