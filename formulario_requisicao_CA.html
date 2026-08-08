@@ -367,7 +367,7 @@ table.impostos tr:last-child  td { background: #FFF2CC; }
         <tr id="row-nf" style="display:none">
           <td class="lbl">Emissão de NF</td>
           <td class="val" colspan="5">
-            <select id="Emissao_NF">
+            <select id="Emissao_NF" onchange="atualizarMinVencimento()">
               <option value="NÃO">NÃO</option>
               <option value="SIM">SIM</option>
             </select>
@@ -499,7 +499,7 @@ Especifique a Chave PIX
     <!-- ══ RODAPÉ — ORIENTAÇÕES DE PREENCHIMENTO ══════════════════ -->
     <div class="section" style="background:#fff8e1;border:1px solid #ffcc80;border-radius:6px;padding:10px 14px;font-size:12px;color:#666;margin-bottom:14px;">
       <strong style="color:#b07000;">⚠ Orientação de preenchimento:</strong>
-      A data de vencimento deve ser planejada para ser no mínimo dois dias após a aprovação. Claro que quanto mais no futuro, melhor.
+      Em solicitações com emissão de NF, a Data 1º Vencimento pode ser qualquer dia a partir de hoje. Nas demais, ela deve cair numa sexta-feira e ser no mínimo 3 dias a partir de hoje.
     </div>
 
     <!-- ══ ENVIO ═══════════════════════════════════════════════ -->
@@ -571,8 +571,8 @@ function init() {
   maxCompetencia.setDate(maxCompetencia.getDate() + 45);
   document.getElementById('Data_Competencia').max = maxCompetencia.toISOString().split('T')[0];
 
-  // Data 1º Vencimento começa em branco; o mínimo permitido é hoje + 2 dias
-  // (data corrente, não a Data de Competência) — ver atualizarMinVencimento().
+  // Data 1º Vencimento começa em branco; a regra (NF vs. normal) é calculada
+  // dinamicamente — ver atualizarMinVencimento().
   atualizarMinVencimento();
 
   ['ISS','PIS','COFINS','CSLL','IRPJ','INSS','Outros'].forEach(id => {
@@ -691,16 +691,30 @@ function atualizarLinhaNFCartao(tipo) {
   document.getElementById('row-nf').style.display = isReceita ? 'table-row' : 'none';
   if (!isReceita) document.getElementById('Emissao_NF').value = 'NÃO';
 
+  atualizarMinVencimento();
 }
 
-// ══ DATA VENCIMENTO → MÍNIMO DE 2 DIAS DA DATA CORRENTE ══════
-// O mínimo permitido para Data 1º Vencimento é hoje + 2 dias (data corrente),
-// não a Data de Competência. Campo começa em branco (ver init()).
+// ══ DATA VENCIMENTO → REGRA DUPLA (emissão de NF vs. normal) ═══
+// Solicitação de emissão de NF (Categoria tipo Receita + Emissão de NF = SIM):
+// o vencimento pode ser qualquer dia a partir de hoje (data da solicitação).
+// Caso contrário: o vencimento precisa cair sempre numa sexta-feira e ser no
+// mínimo 3 dias depois de hoje (data da solicitação, não a Data de Competência).
+// Campo começa em branco (ver init()).
+function isEmissaoNFAtiva() {
+  return document.getElementById('Tipo_Despesa').value === 'Receita' &&
+         document.getElementById('Emissao_NF').value === 'SIM';
+}
+
 function atualizarMinVencimento() {
-  const minVenc = new Date();
-  minVenc.setDate(minVenc.getDate() + 2);
-  const minVencStr = minVenc.toISOString().split('T')[0];
-  document.getElementById('Data_Vencimento').min = minVencStr;
+  const hoje = new Date();
+  const el = document.getElementById('Data_Vencimento');
+  if (isEmissaoNFAtiva()) {
+    el.min = hoje.toISOString().split('T')[0];
+  } else {
+    const minVenc = new Date(hoje);
+    minVenc.setDate(minVenc.getDate() + 3);
+    el.min = minVenc.toISOString().split('T')[0];
+  }
 }
 
 // ══ TIPO DE PARCELAMENTO ═════════════════════════════════════
@@ -1182,10 +1196,26 @@ async function validar() {
 
   const dv = document.getElementById('Data_Vencimento').value;
   if (dv) {
-    const minVenc = new Date();
-    minVenc.setDate(minVenc.getDate() + 2);
-    if (dv < minVenc.toISOString().split('T')[0])
-      erros.push('Data 1º Vencimento deve ser no mínimo daqui a 2 dias');
+    const hoje = new Date();
+    if (isEmissaoNFAtiva()) {
+      const hojeStr = hoje.toISOString().split('T')[0];
+      if (dv < hojeStr) {
+        erros.push('Data 1º Vencimento não pode ser anterior a hoje (' + hojeStr.split('-').reverse().join('/') +
+          ') — em solicitações com emissão de NF, o vencimento pode ser qualquer dia a partir da data da solicitação.');
+      }
+    } else {
+      const minVenc = new Date(hoje);
+      minVenc.setDate(minVenc.getDate() + 3);
+      const minVencStr = minVenc.toISOString().split('T')[0];
+      if (dv < minVencStr) {
+        erros.push('Data 1º Vencimento deve ser no mínimo 3 dias a partir de hoje (' + minVencStr.split('-').reverse().join('/') + '). Ajuste a data para corrigir.');
+      }
+      const [y, m, d] = dv.split('-').map(Number);
+      const diaSemana = new Date(y, m - 1, d).getDay(); // 0=domingo ... 5=sexta, 6=sábado
+      if (diaSemana !== 5) {
+        erros.push('Data 1º Vencimento (' + dv.split('-').reverse().join('/') + ') deve cair numa sexta-feira. Ajuste para a sexta-feira mais próxima que atenda ao mínimo de 3 dias.');
+      }
+    }
   }
 
   return erros;
