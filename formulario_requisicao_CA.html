@@ -1261,6 +1261,11 @@ function calcularValorPorParcela(tipo, valorBrutoForm, numParcelas) {
 function coletarDados() {
   const g = id => document.getElementById(id) ? document.getElementById(id).value : '';
   const catParts = g('Categoria_CA').split('|');
+  // Calculado 1x e reaproveitado em Email_Notificacao e Email_Notificacao_2 (fallback do 2º
+  // destinatário) — evita duplicar a condição em 2 lugares e divergir por engano no futuro.
+  const emailNotificacao = (g('Tipo_Despesa') === 'Receita' && g('Emissao_NF') === 'SIM')
+                          ? 'claudia@rebels.cc' // e-mail da contabilidade (producao)
+                          : g('Email_Aprovador');
 
   return {
     ID_Requisicao:    g('ID_Requisicao'),
@@ -1284,9 +1289,14 @@ function coletarDados() {
     Emissao_NF:       g('Tipo_Despesa') === 'Receita' ? g('Emissao_NF') : 'NÃO',
     // Email_Notificacao: calculado aqui (em vez de via if() no Make) para evitar bug do editor
     // de fórmulas do Make — quando Emissão de NF = SIM, notifica a contabilidade em vez do aprovador da BU.
-    Email_Notificacao: (g('Tipo_Despesa') === 'Receita' && g('Emissao_NF') === 'SIM')
-                          ? 'claudia@rebels.cc' // e-mail da contabilidade (producao)
-                          : g('Email_Aprovador'),
+    Email_Notificacao: emailNotificacao,
+    // Email_Notificacao_2: 2º destinatário do e-mail de solicitação (módulo 12 do Cenário 2).
+    // Só usado para incluir a contadora externa nas solicitações de emissão de NF; fora desse
+    // caso repete Email_Notificacao (nunca fica vazio) para não quebrar o campo "To" do Gmail no
+    // Make, que já deu erro de e-mail inválido/vazio antes neste projeto (ver lição de produção).
+    Email_Notificacao_2: isEmissaoNFAtiva()
+                          ? 'thaise@keepcontabil.com.br' // contadora externa (producao)
+                          : emailNotificacao,
     // Textos condicionais de NF pré-calculados aqui (em vez de if() no Make) — o if() do Make
     // se mostrou não-confiável para comparação de string (mesmo bug do Email_Notificacao acima,
     // confirmado de novo em teste ponta a ponta em 2026-07-16): sempre resolve para o ramo "then"
