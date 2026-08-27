@@ -1358,7 +1358,7 @@ function coletarDados() {
     // no Make (sem função/if()), e os 3 usados em URL (Assunto_Resultado/Linha_Decisao/Label_*)
     // já vêm URL-encoded para não quebrar a querystring dos links Aprovar/Rejeitar.
     Assunto_Solicitacao: (g('Tipo_Despesa') === 'Receita' && g('Emissao_NF') === 'SIM')
-                          ? '[Rebels CA] ' + g('BU_Centro_Custo') + ' Emissão de NF — '
+                          ? '[Rebels CA] Solicitação de Emissão de NF — '
                           : '[Rebels CA] Nova Requisição para Aprovação — ',
     Assunto_Resultado: encodeURIComponent((g('Tipo_Despesa') === 'Receita' && g('Emissao_NF') === 'SIM')
                           ? '[Rebels CA] Retorno de Emissão de NF — '
