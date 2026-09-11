@@ -1,0 +1,1709 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Requisição de Lançamento — Rebels</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  color: #222;
+  background: #f0f2f5;
+  padding: 24px 16px;
+}
+.doc {
+  max-width: 820px;
+  margin: 0 auto;
+  background: #fff;
+  padding: 24px 28px 32px;
+  border: 1px solid #ccc;
+}
+
+/* ── Cabeçalho ── */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 3px solid #2E5FA3;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+.header-left h1 { font-size: 20px; color: #1F3864; font-weight: bold; }
+.header-left p  { color: #595959; font-size: 10px; margin-top: 3px; }
+.header-right { text-align: right; }
+.id-box {
+  background: #1F3864; color: #fff;
+  padding: 5px 14px; border-radius: 4px;
+  font-size: 12px; font-weight: bold; letter-spacing: 1px;
+  display: inline-block; margin-bottom: 4px;
+}
+.header-right .meta { font-size: 10px; color: #595959; }
+
+/* ── Seções ── */
+.section { margin-bottom: 14px; }
+.section-title {
+  background: #2E5FA3; color: #fff;
+  font-size: 10px; font-weight: bold; text-transform: uppercase;
+  letter-spacing: 0.8px; padding: 4px 10px; margin-bottom: 0;
+}
+
+/* ── Tabela de campos ── */
+table.fields { width: 100%; border-collapse: collapse; }
+table.fields td {
+  padding: 5px 8px;
+  border: 1px solid #CCCCCC;
+  vertical-align: middle;
+  font-size: 11px;
+}
+table.fields td.lbl {
+  background: #DEEAF1; color: #1F3864; font-weight: bold;
+  font-size: 10px; white-space: nowrap; width: 18%;
+}
+table.fields td.lbl .req { color: #C00000; }
+#tbl-lancamento { table-layout: fixed; }
+table.fields tr:nth-child(even) td.val { background: #F9F9F9; }
+table.fields td.val { background: #fff; }
+table.fields td.readonly { background: #F2F2F2; color: #555; }
+
+/* ── Inputs ── */
+input[type=text], input[type=number], input[type=date],
+select, textarea {
+  width: 100%;
+  border: 1px solid #BBBBBB;
+  border-radius: 3px;
+  padding: 4px 7px;
+  font-size: 11px;
+  font-family: Arial, sans-serif;
+  color: #222;
+  background: #fff;
+}
+input[type=text]:focus, input[type=number]:focus,
+input[type=date]:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #2E5FA3;
+  box-shadow: 0 0 0 2px rgba(46,95,163,0.15);
+}
+input.readonly-input, select:disabled {
+  background: #F2F2F2;
+  color: #555;
+  cursor: default;
+}
+textarea { resize: vertical; min-height: 54px; }
+
+/* ── CNPJ lookup ── */
+.cnpj-row { display: flex; gap: 6px; align-items: center; }
+.cnpj-row input { flex: 1; }
+.cnpj-status {
+  font-size: 12px; color: #666; font-style: italic;
+  min-height: 18px; margin-top: 3px;
+}
+.btn-lookup {
+  display: none;
+  background: #2E5FA3; color: #fff;
+  border: none; border-radius: 3px;
+  padding: 5px 12px; font-size: 10px; font-weight: bold;
+  cursor: pointer; white-space: nowrap;
+}
+.btn-lookup:hover { background: #1F3864; }
+
+/* ── Valores ── */
+.valores-row { display: flex; gap: 0; }
+.valor-box {
+  flex: 1; border: 1px solid #CCCCCC;
+  padding: 8px 12px;
+}
+.valor-box:not(:last-child) { border-right: none; }
+.valor-box .vb-label {
+  font-size: 9px; font-weight: bold; color: #595959;
+  text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;
+}
+.valor-box.bruto  { background: #F9F9F9; }
+.valor-box.liquido { background: #DEEAF1; }
+
+/* ── Impostos ── */
+table.impostos { width: 100%; border-collapse: collapse; }
+table.impostos td {
+  border: 1px solid #CCCCCC; padding: 6px 8px;
+  vertical-align: top;
+}
+table.impostos td .imp-label {
+  font-size: 9px; font-weight: bold; color: #C55A11;
+  text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 3px;
+}
+table.impostos tr:first-child td { background: #FFF8F0; }
+table.impostos tr:last-child  td { background: #FFF2CC; }
+
+/* ── Parcelamento (linha condicional dentro da seção 3) ── */
+#row-parcelamento { display: none; }
+
+/* ── Aprovação (readonly) ── */
+#sec-aprovacao { display: none; }
+
+/* ── Botão enviar ── */
+.submit-bar {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  align-items: center;
+}
+.btn-submit {
+  background: #1F3864; color: #fff;
+  border: none; border-radius: 4px;
+  padding: 10px 28px; font-size: 13px; font-weight: bold;
+  cursor: pointer; letter-spacing: 0.5px;
+}
+.btn-submit:hover { background: #2E5FA3; }
+.btn-reset {
+  background: #fff; color: #555;
+  border: 1px solid #BBBBBB; border-radius: 4px;
+  padding: 10px 18px; font-size: 12px;
+  cursor: pointer;
+}
+.btn-reset:hover { background: #F2F2F2; }
+
+/* ── Mensagens ── */
+.msg-success {
+  background: #E2EFDA; border: 1px solid #375623; border-radius: 4px;
+  padding: 10px 16px; color: #375623; font-weight: bold; font-size: 12px;
+  display: none; margin-top: 12px;
+}
+.msg-error {
+  background: #FCE4D6; border: 1px solid #C00000; border-radius: 4px;
+  padding: 10px 16px; color: #C00000; font-weight: bold; font-size: 12px;
+  display: none; margin-top: 12px;
+}
+.field-error { border-color: #C00000 !important; }
+.error-text { color: #C00000; font-size: 10px; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="doc">
+
+  <!-- ══ CABEÇALHO ══════════════════════════════════════════════ -->
+  <div class="header">
+    <div class="header-left">
+      <h1>Rebels — Manual de Donos</h1>
+      <p>Formulário de Requisição de Lançamento no Conta Azul</p>
+    </div>
+    <div class="header-right">
+      <div class="id-box" id="display-id">—</div>
+      <div class="meta" id="display-data">—</div>
+    </div>
+  </div>
+
+  <form id="form-req" novalidate>
+
+    <!-- ══ 1. IDENTIFICAÇÃO DA REQUISIÇÃO ═════════════════════ -->
+    <div class="section">
+      <div class="section-title">1. Identificação da Requisição</div>
+      <table class="fields">
+        <tr>
+          <td class="lbl">ID</td>
+          <td class="val readonly"><input type="text" id="ID_Requisicao" class="readonly-input" readonly></td>
+          <td class="lbl" style="width:8%">Data</td>
+          <td class="val readonly"><input type="text" id="Data_Criacao" class="readonly-input" readonly></td>
+          <td class="lbl" style="width:8%">Status</td>
+          <td class="val readonly"><input type="text" id="Status" class="readonly-input" value="Pendente" readonly></td>
+        </tr>
+        <tr>
+          <td class="lbl">Unidade de Negócio <span class="req">*</span></td>
+          <td class="val" colspan="2">
+            <select id="BU_Centro_Custo" required onchange="onBUChange()">
+              <option value="">— selecione —</option>
+              <option value="Corporativo">Corporativo</option>
+              <option value="Ventures">Ventures</option>
+              <option value="Fitfeed">Fitfeed</option>
+              <option value="MdD">MdD</option>
+              <option value="WBC">WBC</option>
+              <option value="BU_Teste">BU_Teste</option>
+            </select>
+          </td>
+          <td class="lbl">Requerente <span class="req">*</span></td>
+          <td class="val" colspan="2">
+            <select id="Nome_Requerente" required>
+              <option value="">— selecione a BU primeiro —</option>
+            </select>
+            <input type="hidden" id="Email_Requerente">
+            <input type="hidden" id="Email_Aprovador">
+            <div class="cnpj-status" id="bu_lookup_status"></div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ══ 2. FORNECEDOR / CLIENTE ════════════════════════════ -->
+    <div class="section">
+      <div class="section-title">2. Fornecedor / Cliente</div>
+      <table class="fields">
+        <tr>
+          <td class="lbl">CNPJ / CPF</td>
+          <td class="val" colspan="5">
+            <div class="cnpj-row">
+              <input type="text" id="CNPJ_CPF" placeholder="00.000.000/0000-00 ou 000.000.000-00" oninput="formatCNPJ(this)" onblur="onBlurCNPJ(this)" maxlength="18">
+              <button type="button" class="btn-lookup" onclick="buscarCNPJ()">🔍 Buscar</button>
+            </div>
+            <div class="cnpj-status" id="cnpj_status"></div>
+          </td>
+        </tr>
+        <tr>
+          <td class="lbl">Nome Fantasia <span class="req">*</span></td>
+          <td class="val" colspan="2"><input type="text" id="Nome_Fantasia" required onblur="buscarPorNomeFantasia()"></td>
+          <td class="lbl">Nome Extrato Cartão</td>
+          <td class="val" colspan="2"><input type="text" id="Nome_extrato_Cartao"></td>
+        </tr>
+        <tr>
+          <td class="lbl">Razão Social</td>
+          <td class="val" colspan="5"><input type="text" id="Razao_Social"></td>
+        </tr>
+        <tr id="fuzzy_suggestion_row" style="display:none;">
+          <td></td>
+          <td class="val" colspan="5">
+            <div id="fuzzy_suggestion_box" style="background:#fff8e1;border:1px solid #ffcc80;border-radius:6px;padding:8px 12px;font-size:13px;">
+              <div id="fuzzy_suggestion_text" style="margin-bottom:6px;"></div>
+              <div id="fuzzy_suggestion_list"></div>
+              <button type="button" class="btn-lookup" style="margin-top:6px;" onclick="rejeitarSugestaoFuzzy()">✘ Nenhum destes, é novo</button>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="lbl">Situação Receita Federal</td>
+          <td class="val" colspan="5"><input type="text" id="Situacao_CNPJ" class="readonly-input" readonly placeholder="Preenchido automaticamente após busca"></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ══ 3. DADOS DO LANÇAMENTO ══════════════════════════════ -->
+    <div class="section">
+      <div class="section-title">3. Dados do Lançamento</div>
+      <table class="fields" id="tbl-lancamento">
+        <tr>
+          <td class="lbl">Categoria CA <span class="req">*</span></td>
+          <td class="val" colspan="5">
+            <select id="Categoria_CA" required onchange="onCategoriaChange()">
+              <option value="">— selecione —</option>
+              <optgroup label="── DESPESAS ──">
+                <option value="Alimentação e Copa|Alimentação e Copa|Despesas|Despesa">Alimentação e Copa</option>
+                <option value="Aluguel e Imóvel|Aluguel e Imóvel|Despesas|Despesa">Aluguel e Imóvel</option>
+                <option value="Assessoria / Agência de Marketing|Assessoria / Agência de Marketing|Despesas|Despesa">Assessoria / Agência de Marketing</option>
+                <option value="Benefícios|Benefícios|Despesas|Despesa">Benefícios</option>
+                <option value="Branding|Branding|Despesas|Despesa">Branding</option>
+                <option value="Brindes para Clientes|4.06 Despesas Comerciais|Despesas|Despesa">Brindes para Clientes</option>
+                <option value="Bônus e Gratificações|Bônus e Gratificações|Despesas|Despesa">Bônus e Gratificações</option>
+                <option value="Cancelamentos e Estornos|Cancelamentos e Estornos|Despesas|Despesa">Cancelamentos e Estornos</option>
+                <option value="Comissões de Vendas|Comissões de Vendas|Despesas|Despesa">Comissões de Vendas</option>
+                <option value="Compra|Compra|Despesas|Despesa">Compra</option>
+                <option value="Compra de Serviço|4.06 Despesas Comerciais|Despesas|Despesa">Compra de Serviço</option>
+                <option value="Condomínio e IPTU|Condomínio e IPTU|Despesas|Despesa">Condomínio e IPTU</option>
+                <option value="Consultoria / Assessoria Adm|Consultoria / Assessoria Adm|Despesas|Despesa">Consultoria / Assessoria Adm</option>
+                <option value="Custo Operacional com Pessoas|Custo Operacional com Pessoas|Despesas|Despesa">Custo Operacional com Pessoas</option>
+                <option value="Descontos Incondicionais|Descontos Incondicionais|Despesas|Despesa">Descontos Incondicionais</option>
+                <option value="Despesas a identificar|4.11 Outras Despesas|Despesas|Despesa">Despesas a identificar</option>
+                <option value="Encargos Trabalhistas|Encargos Trabalhistas|Despesas|Despesa">Encargos Trabalhistas</option>
+                <option value="Energia Elétrica|4.08 Despesas com Imóvel|Despesas|Despesa">Energia Elétrica</option>
+                <option value="Energia, Água e gás|Energia, Água e gás|Despesas|Despesa">Energia, Água e gás</option>
+                <option value="Eventos e Logística|Eventos e Logística|Despesas|Despesa">Eventos e Logística</option>
+                <option value="Ferramentas de Vendas e Performance|Ferramentas de Vendas e Performance|Despesas|Despesa">Ferramentas de Vendas e Performance</option>
+                <option value="Fretes pagos|4.06 Despesas Comerciais|Despesas|Despesa">Fretes pagos</option>
+                <option value="Impostos sobre Vendas (Simples/ISS)|Impostos sobre Vendas (Simples/ISS)|Despesas|Despesa">Impostos sobre Vendas (Simples/ISS)</option>
+                <option value="Investimento em Participações|4.10 Despesas Financeiras|Despesas|Despesa">Investimento em Participações</option>
+                <option value="IRRF|4.01 Impostos sobre Vendas e sobre Serviços|Despesas|Despesa">IRRF</option>
+                <option value="ISS sobre Faturamento|4.01 Impostos sobre Vendas e sobre Serviços|Despesas|Despesa">ISS sobre Faturamento</option>
+                <option value="Juros e Encargos Financeiros|Juros e Encargos Financeiros|Despesas|Despesa">Juros e Encargos Financeiros</option>
+                <option value="Manutenção e Conservação|Manutenção e Conservação|Despesas|Despesa">Manutenção e Conservação</option>
+                <option value="Manutenção Predial|4.08 Despesas com Imóvel|Despesas|Despesa">Manutenção Predial</option>
+                <option value="Marketing e Publicidade|4.06 Despesas Comerciais|Despesas|Despesa">Marketing e Publicidade</option>
+                <option value="Materiais e Brindes|Materiais e Brindes|Despesas|Despesa">Materiais e Brindes</option>
+                <option value="Materiais e Itens de Vendas|Materiais e Itens de Vendas|Despesas|Despesa">Materiais e Itens de Vendas</option>
+                <option value="Material de Escritório e Limpeza|Material de Escritório e Limpeza|Despesas|Despesa">Material de Escritório e Limpeza</option>
+                <option value="Máquinas e Equipamentos|Máquinas e Equipamentos|Despesas|Despesa">Máquinas e Equipamentos</option>
+                <option value="Mentores e Convidados|Mentores e Convidados|Despesas|Despesa">Mentores e Convidados</option>
+                <option value="Mídia Paga / Anúncios|Mídia Paga / Anúncios|Despesas|Despesa">Mídia Paga / Anúncios</option>
+                <option value="Móveis e Instalações|Móveis e Instalações|Despesas|Despesa">Móveis e Instalações</option>
+                <option value="Multas pagas|4.10 Despesas Financeiras|Despesas|Despesa">Multas pagas</option>
+                <option value="PIS/COFINS/CSLL|PIS/COFINS/CSLL|Despesas|Despesa">PIS/COFINS/CSLL</option>
+                <option value="Produtora (Vídeo / Foto / Criação)|Produtora (Vídeo / Foto / Criação)|Despesas|Despesa">Produtora (Vídeo / Foto / Criação)</option>
+                <option value="Remuneração de Autônomos|4.03 Despesas com Salários e Encargos|Despesas|Despesa">Remuneração de Autônomos</option>
+                <option value="Remuneração de Autônomos / PJ|Remuneração de Autônomos / PJ|Despesas|Despesa">Remuneração de Autônomos / PJ</option>
+                <option value="Remuneração de Equipe Comercial|Remuneração de Equipe Comercial|Despesas|Despesa">Remuneração de Equipe Comercial</option>
+                <option value="Restituição de Receita|4.02 Despesas com Vendas e Serviços|Despesas|Despesa">Restituição de Receita</option>
+                <option value="Retenção - Darf 5952 - PIS/COFINS/CSLL|4.01 Impostos sobre Vendas e sobre Serviços|Despesas|Despesa">Retenção - Darf 5952 - PIS/COFINS/CSLL</option>
+                <option value="Retenções na Fonte (IRRF/PIS/COFINS)|Retenções na Fonte (IRRF/PIS/COFINS)|Despesas|Despesa">Retenções na Fonte (IRRF/PIS/COFINS)</option>
+                <option value="Salários|4.03 Despesas com Salários e Encargos|Despesas|Despesa">Salários</option>
+                <option value="Salários CLT|Salários CLT|Despesas|Despesa">Salários CLT</option>
+                <option value="Softwares Administrativos|Softwares Administrativos|Despesas|Despesa">Softwares Administrativos</option>
+                <option value="Softwares Operacionais|Softwares Operacionais|Despesas|Despesa">Softwares Operacionais</option>
+                <option value="Tarifas Bancárias|4.10 Despesas Financeiras|Despesas|Despesa">Tarifas Bancárias</option>
+                <option value="Tarifas de Antecipação|Tarifas de Antecipação|Despesas|Despesa">Tarifas de Antecipação</option>
+                <option value="Taxa de Gateway / MDR|Taxa de Gateway / MDR|Despesas|Despesa">Taxa de Gateway / MDR</option>
+                <option value="Taxas e Cartório|Taxas e Cartório|Despesas|Despesa">Taxas e Cartório</option>
+                <option value="TI/Softwares e suporte|4.07 Despesas de TI|Despesas|Despesa">TI/Softwares e suporte</option>
+                <option value="Time de Produto e Entrega|Time de Produto e Entrega|Despesas|Despesa">Time de Produto e Entrega</option>
+                <option value="Transferência de Saída|Transferência de Saída|Despesas|Despesa">Transferência de Saída</option>
+                <option value="Transporte e Deslocamento|Transporte e Deslocamento|Despesas|Despesa">Transporte e Deslocamento</option>
+                <option value="Vale-Transporte|4.04 Despesas com Colaboradores|Despesas|Despesa">Vale-Transporte</option>
+                <option value="Viagens e Estadias|Viagens e Estadias|Despesas|Despesa">Viagens e Estadias</option>
+              </optgroup>
+              <optgroup label="── RECEITAS ──">
+                <option value="Devolução Fornecedor|3.03 Outras Receitas e Entradas|Receitas|Receita">Devolução Fornecedor</option>
+                <option value="Entradas Desconexas|3.03 Outras Receitas e Entradas|Receitas|Receita">Entradas Desconexas</option>
+                <option value="Receita de Ingresso|3.01 Receitas de Vendas e de Serviços|Receitas|Receita">Receita de Ingresso</option>
+          <option value="Receita de Membership|3.01 Receitas de Vendas e de Serviços|Receitas|Receita">Receita de Membership</option>
+          <option value="Receita de Mídia|3.01 Receitas de Vendas e de Serviços|Receitas|Receita">Receita de Mídia</option>
+          <option value="Receita de Patrocínio|3.01 Receitas de Vendas e de Serviços|Receitas|Receita">Receita de Patrocínio</option>
+<option value="Receita de Rateio Corporativo|Receita de Rateio Corporativo|Receitas|Receita">Receita de Rateio Corporativo</option>
+                <option value="Receitas de Assinaturas|Receitas de Assinaturas|Receitas|Receita">Receitas de Assinaturas</option>
+                <option value="Receitas de Eventos e Mentorias|Receitas de Eventos e Mentorias|Receitas|Receita">Receitas de Eventos e Mentorias</option>
+                <option value="Receitas de Patrocínio / Parceria|Receitas de Patrocínio / Parceria|Receitas|Receita">Receitas de Patrocínio / Parceria</option>
+                <option value="Receitas de Serviços|3.01 Receitas de Vendas e de Serviços|Receitas|Receita">Receitas de Serviços</option>
+                <option value="Receitas de Serviços / Consultoria|Receitas de Serviços / Consultoria|Receitas|Receita">Receitas de Serviços / Consultoria</option>
+                <option value="Receitas de Upsell / Order Bump|Receitas de Upsell / Order Bump|Receitas|Receita">Receitas de Upsell / Order Bump</option>
+                <option value="Receitas de Vendas|3.01 Receitas de Vendas e de Serviços|Receitas|Receita">Receitas de Vendas</option>
+                <option value="Rendimentos de investimentos|Rendimentos de investimentos|Receitas|Receita">Rendimentos de investimentos</option>
+                <option value="Saldo Inicial|Saldo Inicial|Receitas|Receita">Saldo Inicial</option>
+                <option value="Transferência de Entrada|Transferência de Entrada|Receitas|Receita">Transferência de Entrada</option>
+              </optgroup>
+            </select>
+          </td>
+        </tr>
+        <tr id="row-nf" style="display:none">
+          <td class="lbl">Emissão de NF</td>
+          <td class="val" colspan="5">
+            <select id="Emissao_NF" onchange="atualizarMinVencimento()">
+              <option value="NÃO">NÃO</option>
+              <option value="SIM">SIM</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td class="lbl">Categoria Superior</td>
+          <td class="val readonly"><input type="text" id="Categoria_Superior" class="readonly-input" readonly placeholder="Automático"></td>
+          <td class="lbl" style="width:4%">Nível 1</td>
+          <td class="val readonly"><input type="text" id="Cat_Superior_N1" class="readonly-input" readonly placeholder="Automático"></td>
+          <td class="lbl" style="width:4%">Tipo</td>
+          <td class="val readonly"><input type="text" id="Tipo_Despesa" class="readonly-input" readonly placeholder="Automático"></td>
+        </tr>
+        <tr>
+          <td class="lbl">Serviço Prestado <span class="req">*</span></td>
+          <td class="val" colspan="5"><textarea id="Descricao" required style="background-color:#fff0f0" placeholder="Descreva o motivo ou detalhes do lançamento
+Especifique a Chave PIX
+** Texto deve ser curto **
+*** está informação ajudará a identificação no Conta Azul ***"></textarea></td>
+        </tr>
+        <tr>
+          <td class="lbl">Nº Documento</td>
+          <td class="val" colspan="2"><input type="text" id="Numero_Documento" placeholder="NF, boleto, recibo..."></td>
+          <td class="lbl">Data Competência <span class="req">*</span></td>
+          <td class="val" colspan="2"><input type="date" id="Data_Competencia" required></td>
+        </tr>
+        <tr>
+          <td class="lbl">Tipo de Parcelamento <span class="req">*</span></td>
+          <td class="val" colspan="2">
+            <select id="Tipo_Pagamento" required onchange="onTipoPagamentoChange()">
+              <option value="">— selecione —</option>
+              <option value="À Vista">À Vista</option>
+              <option value="Parcelado">Parcelado</option>
+              <option value="Cadenciado">Cadenciado</option>
+              <option value="Cartão à Vista">Cartão à Vista</option>
+              <option value="Cartão Parcelado">Cartão Parcelado</option>
+              <option value="Cartão Cadenciado">Cartão Cadenciado</option>
+            </select>
+          </td>
+          <td class="lbl">Data 1º Vencimento <span class="req">*</span></td>
+          <td class="val" colspan="2"><input type="date" id="Data_Vencimento" required oninput="atualizarPreviewParcelas()"></td>
+        </tr>
+        <tr id="row-parcelamento">
+          <td class="lbl">Número de Parcelas <span class="req">*</span></td>
+          <td class="val" colspan="5"><input type="number" id="Num_Parcelas" step="1" min="2" max="12" placeholder="Ex.: 3 (máximo 12)" oninput="atualizarPreviewParcelas()"></td>
+        </tr>
+        <tr>
+          <td class="lbl">Valor Bruto (R$) <span class="req">*</span></td>
+          <td class="val" colspan="2"><input type="text" id="Valor_Bruto" inputmode="decimal" required placeholder="0,00" oninput="atualizarPreviewParcelas()"></td>
+          <td class="lbl">Imposto Retido</td>
+          <td class="val" colspan="2">
+            <select id="Imposto_Retido" onchange="onImpostoRetidoChange()">
+              <option value="NÃO">NÃO</option>
+              <option value="SIM">SIM</option>
+            </select>
+          </td>
+        </tr>
+        <tr id="row-parcelas-preview" style="display:none">
+          <td class="lbl">Prévia das Parcelas</td>
+          <td class="val" colspan="5">
+            <table id="tabela-parcelas-preview" style="width:100%;border-collapse:collapse;font-size:13px">
+              <thead>
+                <tr>
+                  <th style="text-align:left;padding:4px 8px;border-bottom:1px solid #ccc">Parcela</th>
+                  <th style="text-align:left;padding:4px 8px;border-bottom:1px solid #ccc">Vencimento</th>
+                  <th style="text-align:right;padding:4px 8px;border-bottom:1px solid #ccc">Valor Líquido (R$)</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <div style="margin-top:4px;font-size:11px;color:#666">Para mudar a data da 1ª parcela, edite o campo "Data 1º Vencimento" acima.</div>
+            <div id="parcelas-soma-check" style="margin-top:6px;font-size:12px"></div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ══ 4. RETENÇÕES E IMPOSTOS ════════════════════════════ -->
+    <div class="section" id="sec-impostos" style="display:none">
+      <div class="section-title">4. Retenções e Impostos</div>
+      <table class="impostos">
+        <tr>
+          <td>
+            <div class="imp-label">ISS (R$)</div>
+            <input type="text" id="ISS" inputmode="decimal" value="0" placeholder="0,00">
+          </td>
+          <td>
+            <div class="imp-label">PIS (R$)</div>
+            <input type="text" id="PIS" inputmode="decimal" value="0" placeholder="0,00">
+          </td>
+          <td>
+            <div class="imp-label">COFINS (R$)</div>
+            <input type="text" id="COFINS" inputmode="decimal" value="0" placeholder="0,00">
+          </td>
+          <td>
+            <div class="imp-label">CSLL (R$)</div>
+            <input type="text" id="CSLL" inputmode="decimal" value="0" placeholder="0,00">
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="imp-label">IRPJ (R$)</div>
+            <input type="text" id="IRPJ" inputmode="decimal" value="0" placeholder="0,00">
+          </td>
+          <td>
+            <div class="imp-label">INSS (R$)</div>
+            <input type="text" id="INSS" inputmode="decimal" value="0" placeholder="0,00">
+          </td>
+          <td>
+            <div class="imp-label">Outros (R$)</div>
+            <input type="text" id="Outros" inputmode="decimal" value="0" placeholder="0,00">
+          </td>
+          <td style="background:#fff3e0;">
+            <div class="imp-label" style="color:#1F3864;">Total Impostos (R$)</div>
+            <input type="text" id="Total_Impostos" class="readonly-input" readonly value="0,00">
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ══ 5. OBSERVAÇÕES ══════════════════════════════════════ -->
+    <div class="section">
+      <div class="section-title">5. Observações</div>
+      <table class="fields">
+        <tr>
+          <td class="val" style="padding:8px;">
+            <textarea id="Observacoes" placeholder="*** Comece colocando as informações importante para emissão de NF ***
+Depois coloque outras informações que queira registar para essa solicitação. Todas as informações serão registradas no Conta azul"></textarea>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ══ 6. APROVAÇÃO (readonly — preenchido pelo aprovador) ══ -->
+    <div class="section" id="sec-aprovacao">
+      <div class="section-title">6. Aprovação</div>
+      <table class="fields">
+        <tr>
+          <td class="lbl">Aprovador</td>
+          <td class="val readonly"><input type="text" id="Nome_Aprovador" class="readonly-input" readonly></td>
+          <td class="lbl">Data Aprovação</td>
+          <td class="val readonly"><input type="text" id="Data_Aprovacao" class="readonly-input" readonly></td>
+        </tr>
+        <tr>
+          <td class="lbl">Decisão</td>
+          <td class="val readonly"><input type="text" id="Decisao" class="readonly-input" readonly></td>
+          <td class="lbl">Motivo Rejeição</td>
+          <td class="val readonly"><input type="text" id="Motivo_Rejeicao" class="readonly-input" readonly></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ══ RODAPÉ — ORIENTAÇÕES DE PREENCHIMENTO ══════════════════ -->
+    <div class="section" style="background:#fff8e1;border:1px solid #ffcc80;border-radius:6px;padding:10px 14px;font-size:12px;color:#666;margin-bottom:14px;">
+      <strong style="color:#b07000;">⚠ Orientação de preenchimento:</strong>
+      Em solicitações com emissão de NF, a Data 1º Vencimento pode ser qualquer dia a partir de hoje. Nas demais, ela deve cair numa sexta-feira e ser no mínimo 3 dias a partir de hoje.
+    </div>
+
+    <!-- ══ ENVIO ═══════════════════════════════════════════════ -->
+    <div class="submit-bar">
+      <button type="button" class="btn-reset" onclick="resetForm()">Limpar</button>
+      <button type="submit" class="btn-submit">Enviar Requisição →</button>
+    </div>
+
+    <div class="msg-success" id="msg-success">
+      ✅ Requisição enviada com sucesso! O aprovador será notificado por e-mail.
+    </div>
+    <div class="msg-error" id="msg-error">
+      ❌ <span id="msg-error-text">Erro ao enviar. Verifique os campos e tente novamente.</span>
+    </div>
+
+  </form>
+</div>
+
+<script>
+// ══ CONFIGURAÇÃO ══════════════════════════════════════════════
+const MAKE_WEBHOOK_URL   = 'https://hook.us2.make.com/1nlkcr3x6ocubf0mtycachgg3gtehhw1';
+const MAKE_LOOKUP_URL    = 'https://hook.us2.make.com/rlcy9909pw828x4yrjcmguicquq69x57';
+const MAKE_BU_LOOKUP_URL = 'https://hook.us2.make.com/orc45we6wjth7itme75feu1tti2ra99b';
+const MAKE_LISTAR_FORNECEDORES_URL = 'https://hook.us2.make.com/m29dkmiunx34vq47rpmfd1wazy6cml0e'; // item 6: lista completa p/ busca fuzzy (producao)
+
+// ══ ESTADO DO FORNECEDOR ══════════════════════════════════════
+// 'pendente'  → busca ainda não foi disparada (ou campo mudou após busca)
+// 'ok'        → encontrado na base ou na Receita Federal
+// 'bloqueado' → CNPJ não encontrado na RF → NÃO pode submeter
+// 'novo'      → CPF ou Nome Fantasia não encontrado → será gravado na base
+let fornecedorStatus = 'pendente';
+let salvarFornecedor = false; // true quando o Make deve gravar na aba FORNECEDORES_CLIENTES
+let _buscaId = 0; // contador anti-race-condition: descarta respostas de chamadas antigas
+
+function setFornecedorStatus(status, msg, color) {
+  fornecedorStatus = status;
+  const el = document.getElementById('cnpj_status');
+  el.textContent = msg;
+  el.style.color = color || '#666';
+}
+
+// ══ INICIALIZAÇÃO ════════════════════════════════════════════
+function init() {
+  const now = new Date();
+  const id = 'REQ-' + now.getFullYear().toString() +
+    String(now.getMonth()+1).padStart(2,'0') +
+    String(now.getDate()).padStart(2,'0') + '-' +
+    Math.floor(Math.random()*90000000+10000000);
+  const dataStr = String(now.getDate()).padStart(2,'0') + '/' +
+    String(now.getMonth()+1).padStart(2,'0') + '/' + now.getFullYear() +
+    ' ' + String(now.getHours()).padStart(2,'0') + ':' +
+    String(now.getMinutes()).padStart(2,'0');
+
+  document.getElementById('ID_Requisicao').value = id;
+  document.getElementById('Data_Criacao').value = dataStr;
+  document.getElementById('display-id').textContent = id;
+  document.getElementById('display-data').textContent = 'Criado em: ' + dataStr;
+
+  const hoje = now.toISOString().split('T')[0];
+  document.getElementById('Data_Competencia').value = hoje;
+
+  // Data de Competência começa na data corrente (acima); o intervalo permitido vai de
+  // 90 dias atrás até 45 dias à frente de hoje.
+  const minCompetencia = new Date(now);
+  minCompetencia.setDate(minCompetencia.getDate() - 90);
+  document.getElementById('Data_Competencia').min = minCompetencia.toISOString().split('T')[0];
+
+  const maxCompetencia = new Date(now);
+  maxCompetencia.setDate(maxCompetencia.getDate() + 45);
+  document.getElementById('Data_Competencia').max = maxCompetencia.toISOString().split('T')[0];
+
+  // Data 1º Vencimento começa em branco; a regra (NF vs. normal) é calculada
+  // dinamicamente — ver atualizarMinVencimento().
+  atualizarMinVencimento();
+
+  ['ISS','PIS','COFINS','CSLL','IRPJ','INSS','Outros'].forEach(id => {
+    document.getElementById(id).addEventListener('input', calcTotal);
+  });
+
+  // Reset estado ao digitar no campo CNPJ/CPF (cancela qualquer busca em andamento)
+  document.getElementById('CNPJ_CPF').addEventListener('input', function() {
+    _buscaId++;           // invalida qualquer buscarCNPJ() que ainda esteja rodando
+    fornecedorStatus = 'pendente';
+    salvarFornecedor = false;
+    document.getElementById('cnpj_status').textContent = '';
+  });
+
+  renumerarSecoes();
+}
+
+// ══ BU → REQUERENTES + APROVADOR ═════════════════════════════
+// Sem dados hardcoded: Requerentes vêm da aba REQUERENTES e o Aprovador vem da
+// aba CENTROS_CUSTO, ambos buscados ao vivo via MAKE_BU_LOOKUP_URL a cada troca de BU.
+async function onBUChange() {
+  const bu = document.getElementById('BU_Centro_Custo').value;
+  const sel = document.getElementById('Nome_Requerente');
+  const statusEl = document.getElementById('bu_lookup_status');
+  sel.innerHTML = '<option value="">— selecione —</option>';
+  document.getElementById('Email_Requerente').value = '';
+  document.getElementById('Email_Aprovador').value = '';
+  document.getElementById('Nome_Aprovador').value = '';
+  statusEl.textContent = '';
+  if (!bu) return;
+
+  sel.innerHTML = '<option value="">⏳ Carregando requerentes...</option>';
+  statusEl.textContent = '⏳ Buscando requerente(s) e aprovador da BU...';
+  statusEl.style.color = '#666';
+
+  try {
+    const r = await fetch(MAKE_BU_LOOKUP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bu: bu })
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+
+    if (d.email_aprovador) {
+      document.getElementById('Email_Aprovador').value = d.email_aprovador;
+    }
+    if (d.nome_aprovador) {
+      document.getElementById('Nome_Aprovador').value = d.nome_aprovador;
+    }
+
+    sel.innerHTML = '<option value="">— selecione —</option>';
+    if (Array.isArray(d.requerentes) && d.requerentes.length > 0) {
+      d.requerentes.forEach(req => {
+        const nome  = req['1'] || req.nome  || '';
+        const email = req['2'] || req.email || '';
+        if (!nome) return;
+        const opt = document.createElement('option');
+        opt.value = nome;
+        opt.dataset.email = email;
+        opt.textContent = nome;
+        sel.appendChild(opt);
+      });
+      if (d.requerentes.length === 1) {
+        const only = d.requerentes[0];
+        sel.value = only['1'] || only.nome || '';
+        document.getElementById('Email_Requerente').value = only['2'] || only.email || '';
+      }
+    }
+
+    if (!d.email_aprovador) {
+      statusEl.textContent = '⚠ Aprovador não encontrado para esta BU na aba CENTROS_CUSTO.';
+      statusEl.style.color = '#b07000';
+    } else if (!Array.isArray(d.requerentes) || d.requerentes.length === 0) {
+      statusEl.textContent = '⚠ Nenhum requerente cadastrado para esta BU na aba REQUERENTES.';
+      statusEl.style.color = '#b07000';
+    } else {
+      statusEl.textContent = '';
+    }
+  } catch(e) {
+    console.warn('Lookup dinâmico de requerentes/aprovador falhou:', e);
+    sel.innerHTML = '<option value="">— erro ao buscar, tente selecionar a BU novamente —</option>';
+    statusEl.textContent = '⚠ Falha ao buscar requerente/aprovador. Selecione a Unidade de Negócio novamente.';
+    statusEl.style.color = '#c0392b';
+  }
+}
+
+document.getElementById('Nome_Requerente').addEventListener('change', function() {
+  const opt = this.options[this.selectedIndex];
+  document.getElementById('Email_Requerente').value = opt.dataset.email || '';
+});
+
+// ══ CATEGORIA → AUTO-FILL ════════════════════════════════════
+function onCategoriaChange() {
+  const val = document.getElementById('Categoria_CA').value;
+  if (!val) {
+    document.getElementById('Categoria_Superior').value = '';
+    document.getElementById('Cat_Superior_N1').value = '';
+    document.getElementById('Tipo_Despesa').value = '';
+    atualizarLinhaNFCartao('');
+    return;
+  }
+  const parts = val.split('|');
+  document.getElementById('Categoria_Superior').value = parts[1] || '';
+  document.getElementById('Cat_Superior_N1').value = parts[2] || '';
+  document.getElementById('Tipo_Despesa').value = parts[3] || '';
+  atualizarLinhaNFCartao(parts[3] || '');
+}
+
+// "Emissão de NF" aparece só para Categoria do tipo Receita. Ao esconder o campo, seu valor
+// volta para NÃO (evita enviar SIM residual de uma Categoria selecionada antes e depois
+// trocada para Despesa).
+function atualizarLinhaNFCartao(tipo) {
+  const isReceita = tipo === 'Receita';
+
+  document.getElementById('row-nf').style.display = isReceita ? 'table-row' : 'none';
+  if (!isReceita) document.getElementById('Emissao_NF').value = 'NÃO';
+
+  atualizarMinVencimento();
+}
+
+// ══ DATA VENCIMENTO → REGRA DUPLA (emissão de NF vs. normal) ═══
+// Solicitação de emissão de NF (Categoria tipo Receita + Emissão de NF = SIM):
+// o vencimento pode ser qualquer dia a partir de hoje (data da solicitação).
+// Caso contrário: o vencimento precisa cair sempre numa sexta-feira e ser no
+// mínimo 3 dias depois de hoje (data da solicitação, não a Data de Competência).
+// Campo começa em branco (ver init()).
+function isEmissaoNFAtiva() {
+  return document.getElementById('Tipo_Despesa').value === 'Receita' &&
+         document.getElementById('Emissao_NF').value === 'SIM';
+}
+
+function atualizarMinVencimento() {
+  const hoje = new Date();
+  const el = document.getElementById('Data_Vencimento');
+  if (isEmissaoNFAtiva()) {
+    el.min = hoje.toISOString().split('T')[0];
+  } else {
+    const minVenc = new Date(hoje);
+    minVenc.setDate(minVenc.getDate() + 3);
+    el.min = minVenc.toISOString().split('T')[0];
+  }
+}
+
+// ══ TIPO DE PARCELAMENTO ═════════════════════════════════════
+// À Vista/Cartão à Vista: um único documento, pagamento único.
+// Parcelado/Cartão Parcelado: um único documento gerador, múltiplas datas de vencimento,
+// valor de cada parcela = Valor Bruto do formulário dividido pelo número de parcelas.
+// Cadenciado/Cartão Cadenciado: cada parcela é um documento gerador independente (tantos
+// documentos quanto parcelas), todos com o mesmo valor — o próprio Valor Bruto do formulário,
+// sem dividir. "Cartão X" se comporta exatamente como "X" em todas as regras — os helpers
+// abaixo centralizam essas equivalências para todo o formulário.
+function isTipoParceladoUnico(tipo) {
+  return tipo === 'Parcelado' || tipo === 'Cartão Parcelado';
+}
+function isTipoCadenciado(tipo) {
+  return tipo === 'Cadenciado' || tipo === 'Cartão Cadenciado';
+}
+// Mantido o nome original isTipoParcelado (usado em vários pontos do formulário) — agora
+// cobre qualquer tipo com mais de 1 parcela/documento: Parcelado, Cadenciado e variantes Cartão.
+function isTipoParcelado(tipo) {
+  return isTipoParceladoUnico(tipo) || isTipoCadenciado(tipo);
+}
+function onTipoPagamentoChange() {
+  const tipo = document.getElementById('Tipo_Pagamento').value;
+  const isParcelado = isTipoParcelado(tipo);
+  document.getElementById('row-parcelamento').style.display = isParcelado ? 'table-row' : 'none';
+  if (!isParcelado) {
+    document.getElementById('Num_Parcelas').value = '';
+  }
+  atualizarPreviewParcelas();
+}
+
+// ══ PRÉVIA DAS PARCELAS (datas + valor líquido, editável) ═════
+// Atualiza ao vivo a tabela "Prévia das Parcelas" conforme o usuário preenche Tipo de
+// Parcelamento, Data 1º Vencimento, Número de Parcelas, Valor Bruto e Impostos — mesma lógica
+// usada no envio (calcularDatasParcelas/calcularValoresParcelas). Qualquer mudança nesses 4
+// campos RECONSTRÓI a tabela do zero (decisão do usuário em 2026-09-11), descartando edições
+// manuais feitas anteriormente na prévia — evita inconsistência entre os campos principais e as
+// parcelas mostradas.
+//
+// Edição manual por parcela (decisão do usuário em 2026-09-11, para refletir corretamente
+// negociações com datas/valores fora do padrão de 30 dias / divisão igual):
+// - Parcelado/Cartão Parcelado (2+ parcelas): data E valor de cada parcela são editáveis. A soma
+//   dos valores editados precisa bater com o líquido total (Valor_Bruto − Impostos) — validado em
+//   validar() e conferido ao vivo em onParcelaEditada().
+// - Cadenciado/Cartão Cadenciado (2+ parcelas): só a DATA de cada parcela é editável. O valor
+//   permanece sempre o líquido total cheio, repetido, sem edição — cada parcela cadenciada é um
+//   documento gerador independente e não faz sentido "negociar" uma fração do valor.
+// - À Vista (1 parcela única): sem edição — é só um espelho do que já foi digitado nos campos
+//   principais (Data_Vencimento / Valor Bruto − Impostos).
+function atualizarPreviewParcelas() {
+  const g = id => document.getElementById(id) ? document.getElementById(id).value : '';
+  const linha = document.getElementById('row-parcelas-preview');
+  const corpo = document.querySelector('#tabela-parcelas-preview tbody');
+  const tipo = g('Tipo_Pagamento');
+  const dataVenc1 = g('Data_Vencimento');
+  const brutoNum = parseBRNumber(g('Valor_Bruto'));
+
+  if (!tipo || !dataVenc1 || !brutoNum) {
+    linha.style.display = 'none';
+    corpo.innerHTML = '';
+    document.getElementById('parcelas-soma-check').textContent = '';
+    return;
+  }
+
+  const numParcelasInt = isTipoParcelado(tipo) ? (parseInt(g('Num_Parcelas'), 10) || 0) : 1;
+  if (isTipoParcelado(tipo) && numParcelasInt < 2) {
+    linha.style.display = 'none';
+    corpo.innerHTML = '';
+    document.getElementById('parcelas-soma-check').textContent = '';
+    return;
+  }
+
+  const totalImpostosNum = parseFloat((g('Total_Impostos') || '0').replace(',', '.')) || 0;
+  const liquidoTotal = Math.round((brutoNum - totalImpostosNum) * 100) / 100;
+  const datas = calcularDatasParcelas(dataVenc1, numParcelasInt);
+  const valores = calcularValoresParcelas(tipo, liquidoTotal, numParcelasInt);
+
+  // A data da 1ª parcela NÃO ganha input próprio na prévia — ela é sempre a mesma coisa que o
+  // campo "Data 1º Vencimento" no corpo do formulário (id="Data_Vencimento", logo acima da
+  // tabela). Ter dois campos editáveis independentes para a mesma data 1 causava exatamente o
+  // problema relatado pelo usuário em 2026-09-11: editar a data na prévia não alterava o que era
+  // de fato gravado, porque o valor gravado sempre vem de g('Data_Vencimento'). Então só as
+  // parcelas 2 em diante ganham data editável na prévia; a 1ª é só texto espelhando o campo
+  // principal (edite ali para mudar a data da 1ª parcela).
+  const valorEditavel = isTipoParceladoUnico(tipo) && numParcelasInt > 1; // só Parcelado
+
+  corpo.innerHTML = '';
+  for (let i = 0; i < numParcelasInt; i++) {
+    const tr = document.createElement('tr');
+    const dataDefault = datas[i] || '';
+    const valorDefault = (valores[i] !== undefined ? valores[i] : 0);
+    const dataEditavelLinha = i > 0 && numParcelasInt > 1;
+
+    const dataCell = dataEditavelLinha
+      ? '<input type="date" class="parcela-data-input" data-idx="' + i + '" value="' + dataDefault + '" required oninput="onParcelaEditada()" style="width:100%;border:1px solid #ccc;border-radius:4px;padding:2px 4px;font-size:13px">'
+      : (dataDefault ? dataDefault.split('-').reverse().join('/') : '');
+
+    const valorCell = valorEditavel
+      ? '<input type="text" class="parcela-valor-input" data-idx="' + i + '" inputmode="decimal" required value="' + valorDefault.toFixed(2).replace('.', ',') + '" oninput="onParcelaEditada()" style="width:100%;text-align:right;border:1px solid #ccc;border-radius:4px;padding:2px 4px;font-size:13px">'
+      : valorDefault.toFixed(2).replace('.', ',');
+
+    tr.innerHTML = '<td style="padding:4px 8px;border-bottom:1px solid #eee">' + (i + 1) + '/' + numParcelasInt + '</td>' +
+                   '<td style="padding:4px 8px;border-bottom:1px solid #eee">' + dataCell + '</td>' +
+                   '<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right">' + valorCell + '</td>';
+    corpo.appendChild(tr);
+  }
+  linha.style.display = 'table-row';
+  onParcelaEditada();
+}
+
+// Conferência ao vivo (só relevante quando o Valor é editável, ou seja, Parcelado com 2+
+// parcelas): soma os valores digitados na prévia e compara com o líquido total esperado,
+// mostrando feedback visual imediato — a validação que bloqueia o envio está em validar().
+function onParcelaEditada() {
+  const el = document.getElementById('parcelas-soma-check');
+  const valorInputs = document.querySelectorAll('.parcela-valor-input');
+  if (valorInputs.length === 0) { el.textContent = ''; return; }
+
+  const brutoNum = parseBRNumber(document.getElementById('Valor_Bruto').value);
+  const totalImpostosNum = parseFloat((document.getElementById('Total_Impostos').value || '0').replace(',', '.')) || 0;
+  const liquidoTotal = Math.round((brutoNum - totalImpostosNum) * 100) / 100;
+
+  let soma = 0;
+  valorInputs.forEach(inp => { soma += parseBRNumber(inp.value); });
+  soma = Math.round(soma * 100) / 100;
+
+  const somaFmt = soma.toFixed(2).replace('.', ',');
+  const totalFmt = liquidoTotal.toFixed(2).replace('.', ',');
+  if (Math.abs(soma - liquidoTotal) > 0.01) {
+    el.innerHTML = '⚠️ Soma das parcelas: <strong>R$ ' + somaFmt + '</strong> — difere do líquido total (R$ ' + totalFmt + '). Ajuste antes de enviar.';
+    el.style.color = '#b91c1c';
+  } else {
+    el.innerHTML = '✓ Soma das parcelas confere com o líquido total (R$ ' + totalFmt + ')';
+    el.style.color = '#16a34a';
+  }
+}
+
+// ══ IMPOSTO RETIDO → MOSTRAR/OCULTAR IMPOSTOS ═════════════════
+function onImpostoRetidoChange() {
+  const val = document.getElementById('Imposto_Retido').value;
+  document.getElementById('sec-impostos').style.display = (val === 'SIM') ? 'block' : 'none';
+  renumerarSecoes();
+}
+
+// ══ RENUMERAR SEÇÕES (1., 2., 3. ...) ═════════════════════════
+// A seção "4. Retenções e Impostos" só aparece quando Imposto Retido = SIM; sem essa
+// renumeração, quando ela fica oculta a próxima seção visível ("Observações") continuaria
+// rotulada "5." em vez de "4.", pulando um número. Renumera sequencialmente só as seções
+// com display diferente de "none" no momento, preservando o texto do título após o número.
+function renumerarSecoes() {
+  let n = 0;
+  document.querySelectorAll('.section').forEach(function(sec) {
+    const titulo = sec.querySelector('.section-title');
+    if (!titulo) return;
+    if (getComputedStyle(sec).display === 'none') return;
+    n++;
+    titulo.textContent = titulo.textContent.replace(/^\d+\./, n + '.');
+  });
+}
+
+// ══ NÚMEROS EM GRAFIA BRASILEIRA ═════════════════════════════
+// Todos os campos monetários do formulário (Valor Bruto, Valor Líquido e os 7 impostos) usam
+// input type="text" (não mais type="number") e aceitam só grafia brasileira: vírgula decimal,
+// com ponto de milhar opcional em grupos de 3 (ex.: 1234,56 ou 1.234,56). Formato americano
+// (1234.56) é rejeitado — motivo: um <input type="number"> aceita apenas ponto decimal e
+// silenciosamente descarta a vírgula digitada (ex.: usuário digita "1.234,56" pretendendo mil
+// duzentos e trinta e quatro reais, o campo recusa a vírgula e o valor salvo vira "1.234" =
+// 1,234 — erro silencioso de valor em dado financeiro). Bloqueado no envio (ver validar()).
+const BR_NUMBER_RE = /^\d{1,3}(\.\d{3})*(,\d{1,2})?$|^\d+(,\d{1,2})?$/;
+
+function isValidBRNumber(str) {
+  return BR_NUMBER_RE.test((str || '').trim());
+}
+
+function parseBRNumber(str) {
+  const s = (str || '').trim();
+  if (!s) return 0;
+  return parseFloat(s.replace(/\./g, '').replace(',', '.')) || 0;
+}
+
+// ══ TOTAL IMPOSTOS ═══════════════════════════════════════════
+function calcTotal() {
+  const campos = ['ISS','PIS','COFINS','CSLL','IRPJ','INSS','Outros'];
+  let total = 0;
+  campos.forEach(id => {
+    total += parseBRNumber(document.getElementById(id).value);
+  });
+  document.getElementById('Total_Impostos').value =
+    total.toFixed(2).replace('.', ',');
+  atualizarPreviewParcelas();
+}
+
+// ══ CNPJ FORMAT ══════════════════════════════════════════════
+function formatCNPJ(input) {
+  let v = input.value.replace(/\D/g, '');
+  if (v.length <= 11) {
+    v = v.replace(/(\d{3})(\d)/, '$1.$2')
+         .replace(/(\d{3})(\d)/, '$1.$2')
+         .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+  } else {
+    v = v.replace(/(\d{2})(\d)/, '$1.$2')
+         .replace(/(\d{3})(\d)/, '$1.$2')
+         .replace(/(\d{3})(\d)/, '$1/$2')
+         .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+  }
+  input.value = v;
+}
+
+// ══ HELPER: preenche campos do fornecedor ════════════════════
+function preencherCamposFornecedor(d) {
+  if (d.razao_social        !== undefined) document.getElementById('Razao_Social').value        = d.razao_social        || '';
+  if (d.nome_fantasia       !== undefined) document.getElementById('Nome_Fantasia').value       = d.nome_fantasia       || '';
+  if (d.nome_extrato_cartao !== undefined) document.getElementById('Nome_extrato_Cartao').value = d.nome_extrato_cartao || '';
+  if (d.situacao_cnpj       !== undefined) document.getElementById('Situacao_CNPJ').value       = d.situacao_cnpj       || '';
+}
+
+// ══ SITUAÇÃO 1 e 2: CNPJ / CPF ═══════════════════════════════
+// Dispara automaticamente ao sair do campo (onblur)
+function onBlurCNPJ(input) {
+  const raw = input.value.replace(/\D/g,'');
+  if (raw.length === 11 || raw.length === 14) buscarCNPJ();
+}
+
+async function buscarCNPJ() {
+  const meuId = ++_buscaId; // cada chamada tem um ID único; chamadas antigas são descartadas
+
+  const raw = document.getElementById('CNPJ_CPF').value.replace(/\D/g,'');
+  if (raw.length !== 11 && raw.length !== 14) return;
+
+  const isCPF = raw.length === 11;
+  setFornecedorStatus('pendente', '⏳ Consultando base...', '#666');
+
+  // ── Passo 1: consultar a base FORNECEDORES_CLIENTES via Make ──
+  let foundInBase = false;
+  try {
+    const r = await fetch(MAKE_LOOKUP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cnpj: raw, tipo: isCPF ? 'cpf' : 'cnpj' })
+    });
+    if (meuId !== _buscaId) return; // chamada mais recente já foi disparada — descarta esta
+    if (r.ok) {
+      const d = await r.json();
+      if (meuId !== _buscaId) return;
+      if (d.found_in_base === true || d.found_in_base === 'true') {
+        // Encontrado na base local
+        preencherCamposFornecedor(d);
+        setFornecedorStatus('ok', '✔ Encontrado na base local', '#2a7a2a');
+        salvarFornecedor = false;
+        foundInBase = true;
+      } else if (!isCPF && d.razao_social) {
+        // Make já consultou a RF e trouxe os dados — usa diretamente, sem segunda chamada
+        preencherCamposFornecedor(d);
+        setFornecedorStatus('ok',
+          '✔ Dados obtidos da Receita Federal. Será gravado na base ao submeter.',
+          '#2a7a2a');
+        salvarFornecedor = true;
+        foundInBase = true;
+      }
+    }
+  } catch(e) {
+    if (meuId !== _buscaId) return;
+    console.warn('Lookup base falhou:', e);
+  }
+
+  if (foundInBase) return;
+
+  // ── Passo 2: não encontrado na base ──────────────────────────
+
+  if (isCPF) {
+    // SITUAÇÃO 2b: CPF não encontrado → avisa, não bloqueia
+    setFornecedorStatus('novo',
+      '⚠ CPF não encontrado na base — preencha os campos manualmente. Será gravado ao submeter.',
+      '#b07000');
+    salvarFornecedor = true;
+    return;
+  }
+
+  // SITUAÇÃO 1b: CNPJ não encontrado na base → consultar Receita Federal
+  setFornecedorStatus('pendente', '⏳ Não está na base. Consultando Receita Federal...', '#666');
+  try {
+    const r = await fetch('https://publica.cnpj.ws/cnpj/' + raw);
+    if (meuId !== _buscaId) return;
+    if (!r.ok) throw new Error('não encontrado');
+    const d = await r.json();
+    if (meuId !== _buscaId) return;
+
+    const razao    = d.razao_social || '';
+    const fantasia = d.nome_fantasia || (d.estabelecimento && d.estabelecimento.nome_fantasia) || '';
+    const situacao = d.descricao_situacao_cadastral
+                  || (d.estabelecimento && d.estabelecimento.situacao_cadastral) || '';
+
+    preencherCamposFornecedor({ razao_social: razao, nome_fantasia: fantasia, situacao_cnpj: situacao });
+    setFornecedorStatus('ok',
+      '✔ Dados obtidos da Receita Federal. Será gravado na base ao submeter.',
+      '#2a7a2a');
+    salvarFornecedor = true;
+
+  } catch(e) {
+    if (meuId !== _buscaId) return;
+    // SITUAÇÃO 1b — CNPJ não encontrado na RF → BLOQUEIA
+    setFornecedorStatus('bloqueado',
+      '❌ CNPJ não encontrado na Receita Federal. Verifique o número ou use apenas o Nome Fantasia.',
+      '#C00000');
+    salvarFornecedor = false;
+  }
+}
+
+// ══ SITUAÇÃO 3: Nome Fantasia (CNPJ/CPF em branco) ═══════════
+async function buscarPorNomeFantasia() {
+  const cnpj = document.getElementById('CNPJ_CPF').value.replace(/\D/g, '');
+  if (cnpj.length > 0) return; // CNPJ/CPF preenchido — não usa essa rota
+
+  const nomeFantasia = document.getElementById('Nome_Fantasia').value.trim();
+  if (!nomeFantasia) return;
+
+  esconderSugestaoFuzzy();
+  setFornecedorStatus('pendente', '⏳ Buscando por Nome Fantasia...', '#666');
+
+  let found = false;
+  try {
+    const r = await fetch(MAKE_LOOKUP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nome_fantasia: nomeFantasia })
+    });
+    if (r.ok) {
+      const d = await r.json();
+      if (d.found_in_base === true || d.found_in_base === 'true') {
+        if (d.cnpj_cpf) document.getElementById('CNPJ_CPF').value = d.cnpj_cpf;
+        preencherCamposFornecedor(d);
+        setFornecedorStatus('ok', '✔ Encontrado na base por Nome Fantasia', '#2a7a2a');
+        salvarFornecedor = false;
+        found = true;
+      }
+    }
+  } catch(e) {
+    console.warn('buscarPorNomeFantasia:', e);
+  }
+
+  if (!found) {
+    // SITUAÇÃO 3b: não encontrado na busca exata → tenta busca aproximada (fuzzy)
+    // antes de assumir que é fornecedor novo (item 6 — nunca autopreenche, só sugere).
+    salvarFornecedor = true;
+    setFornecedorStatus('novo',
+      '⚠ Nome Fantasia não encontrado na base. Será gravado ao submeter.',
+      '#b07000');
+
+    const candidatos = await buscarCandidatosFornecedor(nomeFantasia);
+    if (candidatos.length > 0) {
+      renderSugestoesFuzzy(candidatos, nomeFantasia);
+    }
+  }
+}
+
+// ══ ITEM 6: busca aproximada (fuzzy) client-side ═════════════
+// Usada como fallback quando a busca exata (case-insensitive) no Make não encontra nada.
+// Nunca autopreenche — só sugere; o usuário confirma clicando "Usar este".
+let _fornecedoresCachePromise = null;
+
+function normalizarTexto(s) {
+  return (s || '')
+    .toString()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '') // remove acentos
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, ' ');
+}
+
+// Distância de Levenshtein padrão (programação dinâmica)
+function levenshtein(a, b) {
+  if (a === b) return 0;
+  if (!a.length) return b.length;
+  if (!b.length) return a.length;
+  const dp = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
+  for (let j = 0; j <= b.length; j++) dp[0][j] = j;
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      dp[i][j] = a[i-1] === b[j-1]
+        ? dp[i-1][j-1]
+        : 1 + Math.min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1]);
+    }
+  }
+  return dp[a.length][b.length];
+}
+
+// Similaridade normalizada 0..1 (1 = idêntico)
+function similaridade(a, b) {
+  const na = normalizarTexto(a), nb = normalizarTexto(b);
+  if (!na || !nb) return 0;
+  const dist = levenshtein(na, nb);
+  return 1 - dist / Math.max(na.length, nb.length);
+}
+
+// Busca (uma vez) a lista completa de FORNECEDORES_CLIENTES via o webhook "Listar Fornecedores"
+async function carregarFornecedoresCache() {
+  if (_fornecedoresCachePromise) return _fornecedoresCachePromise;
+  _fornecedoresCachePromise = (async () => {
+    try {
+      const r = await fetch(MAKE_LISTAR_FORNECEDORES_URL);
+      if (!r.ok) return [];
+      const d = await r.json();
+      const lista = Array.isArray(d.fornecedores) ? d.fornecedores : [];
+      // Chaves posicionais do Array Aggregator do Make: 1=CNPJ_CPF, 3=Razao_Social, 4=Nome_Fantasia, 5=Nome_extrato_cartao
+      return lista.map(f => ({
+        cnpj:    f['1'] || '',
+        razao:   f['3'] || '',
+        fantasia: f['4'] || '',
+        cartao:  f['5'] || ''
+      })).filter(f => f.razao || f.fantasia);
+    } catch(e) {
+      console.warn('carregarFornecedoresCache:', e);
+      return [];
+    }
+  })();
+  return _fornecedoresCachePromise;
+}
+
+// Retorna lista de candidatos (não exatos) que "contêm" o texto digitado (prefixo/trecho, tipo
+// autocomplete) OU são "parecidos" por Levenshtein (correção de typo). Combina os dois critérios
+// para não perder nem busca parcial (ex: "hias" → "HIAS GROUP") nem typo (ex: "HIAS GRUOP" → "HIAS GROUP").
+let _fuzzyCandidatos = [];
+
+async function buscarCandidatosFornecedor(nomeDigitado) {
+  const LIMIAR_FUZZY = 0.72;      // abaixo disso, considera "não parecido o suficiente"
+  const MIN_LEN_CONTAINS = 2;     // evita "contains" disparar com 1 caractere só
+  const nInput = normalizarTexto(nomeDigitado);
+  const lista = await carregarFornecedoresCache();
+  const candidatos = [];
+
+  for (const registro of lista) {
+    const nRazao    = normalizarTexto(registro.razao);
+    const nFantasia = normalizarTexto(registro.fantasia);
+
+    const ehExato = nRazao === nInput || nFantasia === nInput;
+    if (ehExato) continue; // já teria sido pego pela busca exata do Make
+
+    const contemRazao    = nInput.length >= MIN_LEN_CONTAINS && nRazao.includes(nInput);
+    const contemFantasia = nInput.length >= MIN_LEN_CONTAINS && nFantasia.includes(nInput);
+
+    if (contemRazao || contemFantasia) {
+      // "contains": prioriza o campo cujo tamanho é mais próximo do texto digitado
+      const tamanhoRef = contemFantasia && (!contemRazao || nFantasia.length <= nRazao.length)
+        ? nFantasia.length : nRazao.length;
+      candidatos.push({ registro, tipo: 'contains', score: 1, tamanhoRef });
+      continue;
+    }
+
+    const scoreRazao    = similaridade(nomeDigitado, registro.razao);
+    const scoreFantasia = similaridade(nomeDigitado, registro.fantasia);
+    const score = Math.max(scoreRazao, scoreFantasia);
+    if (score >= LIMIAR_FUZZY && score < 1) {
+      candidatos.push({ registro, tipo: 'fuzzy', score, tamanhoRef: 0 });
+    }
+  }
+
+  // "contains" primeiro (mais curtos/próximos ao texto digitado primeiro), depois "fuzzy" por score desc
+  candidatos.sort((a, b) => {
+    if (a.tipo !== b.tipo) return a.tipo === 'contains' ? -1 : 1;
+    if (a.tipo === 'contains') return a.tamanhoRef - b.tamanhoRef;
+    return b.score - a.score;
+  });
+
+  return candidatos.slice(0, 8); // limita a lista para não poluir a tela
+}
+
+function renderSugestoesFuzzy(candidatos, nomeDigitado) {
+  _fuzzyCandidatos = candidatos;
+  document.getElementById('fuzzy_suggestion_text').textContent =
+    `🔎 Encontramos ${candidatos.length} fornecedor(es) parecido(s) com "${nomeDigitado}". Selecione um ou informe que é novo:`;
+
+  const lista = document.getElementById('fuzzy_suggestion_list');
+  lista.innerHTML = '';
+  candidatos.forEach((c, idx) => {
+    const nomeExibido = c.registro.razao || c.registro.fantasia;
+    const detalhe = (c.registro.fantasia && c.registro.fantasia !== c.registro.razao) ? ` (${c.registro.fantasia})` : '';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-lookup';
+    btn.style.cssText = 'display:block;margin:3px 0;text-align:left;width:100%;';
+    btn.textContent = `✔ ${nomeExibido}${detalhe}`;
+    btn.onclick = () => aceitarSugestaoFuzzy(idx);
+    lista.appendChild(btn);
+  });
+
+  document.getElementById('fuzzy_suggestion_row').style.display = '';
+}
+
+function esconderSugestaoFuzzy() {
+  document.getElementById('fuzzy_suggestion_row').style.display = 'none';
+  document.getElementById('fuzzy_suggestion_text').textContent = '';
+  document.getElementById('fuzzy_suggestion_list').innerHTML = '';
+  _fuzzyCandidatos = [];
+}
+
+function aceitarSugestaoFuzzy(idx) {
+  const candidato = _fuzzyCandidatos[idx];
+  if (!candidato) return;
+  const registro = candidato.registro;
+  if (registro.cnpj) document.getElementById('CNPJ_CPF').value = registro.cnpj;
+  preencherCamposFornecedor({
+    razao_social:        registro.razao,
+    nome_fantasia:       registro.fantasia,
+    nome_extrato_cartao: registro.cartao
+  });
+  setFornecedorStatus('ok', '✔ Fornecedor confirmado pelo usuário (selecionado na lista)', '#2a7a2a');
+  salvarFornecedor = false;
+  esconderSugestaoFuzzy();
+}
+
+function rejeitarSugestaoFuzzy() {
+  esconderSugestaoFuzzy();
+  setFornecedorStatus('novo',
+    '⚠ Nome Fantasia não encontrado na base. Será gravado ao submeter.',
+    '#b07000');
+  salvarFornecedor = true;
+}
+
+// ══ VALIDAÇÃO ════════════════════════════════════════════════
+async function validar() {
+  const erros = [];
+  const req = (id, label) => {
+    const el = document.getElementById(id);
+    const val = el ? el.value.trim() : '';
+    if (!val) erros.push(label);
+  };
+
+  req('BU_Centro_Custo', 'Unidade de Negócio');
+  req('Nome_Requerente', 'Requerente');
+
+  // ── Validação do bloco Fornecedor/Cliente ──────────────────
+  // Nome Fantasia agora é sempre obrigatório (2026-07-29) — CNPJ/CPF passou a ser opcional.
+  // Motivo: um Nome Fantasia vazio no formulário podia colidir com outra linha igualmente vazia
+  // em FORNECEDORES_CLIENTES na busca por match exato do Cenário 2, fazendo o sistema reaproveitar
+  // por engano o ID_FornCli de um fornecedor completamente diferente (ver lição #22 do projeto).
+  const cnpjRaw = document.getElementById('CNPJ_CPF').value.replace(/\D/g,'');
+  const nfVal   = document.getElementById('Nome_Fantasia').value.trim();
+
+  req('Nome_Fantasia', 'Nome Fantasia');
+
+  if (cnpjRaw.length > 0 && cnpjRaw.length !== 11 && cnpjRaw.length !== 14) {
+    erros.push('CNPJ / CPF inválido — deve ter 11 (CPF) ou 14 (CNPJ) dígitos');
+  } else if (fornecedorStatus === 'pendente') {
+    // Busca ainda não foi disparada — dispara agora e aguarda
+    if (cnpjRaw.length === 11 || cnpjRaw.length === 14) {
+      await buscarCNPJ();
+    } else if (nfVal) {
+      await buscarPorNomeFantasia();
+    }
+    // Após a busca, re-avalia
+    if (fornecedorStatus === 'bloqueado') {
+      erros.push('CNPJ não encontrado na Receita Federal — corrija o número ou use apenas Nome Fantasia');
+    }
+  } else if (fornecedorStatus === 'bloqueado') {
+    erros.push('CNPJ não encontrado na Receita Federal — corrija o número ou use apenas Nome Fantasia');
+  }
+
+  // Email_Aprovador vem só da busca dinâmica (aba CENTROS_CUSTO) em onBUChange();
+  // sem fallback estático — se não veio, bloqueia o envio em vez de usar dado desatualizado.
+  req('Email_Aprovador', 'E-mail do Aprovador não encontrado — selecione a BU novamente');
+
+  // Razão Social só obrigatória quando CNPJ (14 dígitos) for informado
+  if (cnpjRaw.length === 14) {
+    req('Razao_Social', 'Razão Social');
+  }
+  req('Categoria_CA', 'Categoria CA');
+  req('Descricao', 'Serviço Prestado');
+  req('Data_Competencia', 'Data de Competência');
+  req('Valor_Bruto', 'Valor Bruto');
+  req('Tipo_Pagamento', 'Tipo de Parcelamento');
+  req('Data_Vencimento', 'Data 1º Vencimento');
+
+  // ── Grafia brasileira nos campos numéricos (Valor Bruto + 7 impostos) ──
+  // Bloqueia o envio se algum valor preenchido não estiver em grafia brasileira válida
+  // (vírgula decimal — ver BR_NUMBER_RE). Campo vazio é tratado pelos req() acima (obrigatórios)
+  // ou é opcional e assume 0 (ISS/PIS/COFINS/CSLL/IRPJ/INSS/Outros já vêm com value="0").
+  const CAMPOS_NUMERICOS_BR = {
+    Valor_Bruto: 'Valor Bruto',
+    ISS: 'ISS', PIS: 'PIS', COFINS: 'COFINS', CSLL: 'CSLL',
+    IRPJ: 'IRPJ', INSS: 'INSS', Outros: 'Outros'
+  };
+  Object.entries(CAMPOS_NUMERICOS_BR).forEach(([id, label]) => {
+    const val = document.getElementById(id).value.trim();
+    if (!val) return;
+    if (!isValidBRNumber(val)) {
+      erros.push(label + ': valor "' + val + '" inválido — use grafia brasileira, ex.: 1234,56 ou 1.234,56');
+    } else if (parseBRNumber(val) < 0) {
+      erros.push(label + ' não pode ser negativo');
+    }
+  });
+
+  // Número de Parcelas é sempre inteiro — sem vírgula/ponto (evita ex.: "3,5" parcelas).
+  if (isTipoParcelado(document.getElementById('Tipo_Pagamento').value)) {
+    const numParcelasStr = document.getElementById('Num_Parcelas').value.trim();
+    const numParcelas = parseInt(numParcelasStr, 10);
+    if (numParcelasStr && !/^\d+$/.test(numParcelasStr)) {
+      erros.push('Número de Parcelas deve ser um número inteiro (sem vírgula ou ponto)');
+    } else if (!numParcelas || numParcelas < 2) {
+      erros.push('Número de Parcelas (mínimo 2, quando Tipo de Parcelamento exigir parcelas)');
+    } else if (numParcelas > 12) {
+      erros.push('Número de Parcelas não pode ser maior que 12 (limite da planilha REQUICOES)');
+    }
+  }
+
+  // ── Prévia das Parcelas: datas obrigatórias + soma dos valores editados (Parcelado) ──
+  // Decisão do usuário em 2026-09-11: quando a data/valor de cada parcela é editável (ver
+  // atualizarPreviewParcelas()), nenhum campo pode ficar vazio, e — só no caso de Parcelado, onde
+  // o valor é editável — a soma dos valores precisa bater com o líquido total (Bruto − Impostos),
+  // com tolerância de R$ 0,01 para arredondamento. Cadenciado não valida soma pois o valor não é
+  // editável (sempre o líquido cheio, repetido).
+  document.querySelectorAll('.parcela-data-input').forEach((inp, idx) => {
+    if (!inp.value) erros.push('Vencimento da parcela ' + (idx + 1) + ' não pode ficar vazio na Prévia das Parcelas.');
+  });
+  const parcelaValorInputs = document.querySelectorAll('.parcela-valor-input');
+  if (parcelaValorInputs.length > 0) {
+    const brutoNum = parseBRNumber(document.getElementById('Valor_Bruto').value);
+    const totalImpostosNum = parseFloat((document.getElementById('Total_Impostos').value || '0').replace(',', '.')) || 0;
+    const liquidoTotalParcelas = Math.round((brutoNum - totalImpostosNum) * 100) / 100;
+    let somaParcelas = 0;
+    let algumVazio = false;
+    parcelaValorInputs.forEach(inp => {
+      if (!inp.value.trim()) algumVazio = true;
+      else somaParcelas += parseBRNumber(inp.value);
+    });
+    somaParcelas = Math.round(somaParcelas * 100) / 100;
+    if (algumVazio) {
+      erros.push('Preencha o valor de todas as parcelas na Prévia das Parcelas.');
+    } else if (Math.abs(somaParcelas - liquidoTotalParcelas) > 0.01) {
+      erros.push('A soma dos valores das parcelas (R$ ' + somaParcelas.toFixed(2).replace('.', ',') +
+        ') não bate com o valor líquido total (R$ ' + liquidoTotalParcelas.toFixed(2).replace('.', ',') +
+        '). Ajuste a Prévia das Parcelas.');
+    }
+  }
+
+  const dc = document.getElementById('Data_Competencia').value;
+  if (dc) {
+    const agora = new Date();
+    const minDc = new Date(agora); minDc.setDate(minDc.getDate() - 90);
+    const maxDc = new Date(agora); maxDc.setDate(maxDc.getDate() + 45);
+    const minDcStr = minDc.toISOString().split('T')[0];
+    const maxDcStr = maxDc.toISOString().split('T')[0];
+    if (dc < minDcStr || dc > maxDcStr) erros.push('Data de Competência deve estar entre ' + minDcStr.split('-').reverse().join('/') + ' e ' + maxDcStr.split('-').reverse().join('/'));
+  }
+
+  const dv = document.getElementById('Data_Vencimento').value;
+  if (dv) {
+    const hoje = new Date();
+    if (isEmissaoNFAtiva()) {
+      const hojeStr = hoje.toISOString().split('T')[0];
+      if (dv < hojeStr) {
+        erros.push('Data 1º Vencimento não pode ser anterior a hoje (' + hojeStr.split('-').reverse().join('/') +
+          ') — em solicitações com emissão de NF, o vencimento pode ser qualquer dia a partir da data da solicitação.');
+      }
+    } else {
+      const minVenc = new Date(hoje);
+      minVenc.setDate(minVenc.getDate() + 3);
+      const minVencStr = minVenc.toISOString().split('T')[0];
+      if (dv < minVencStr) {
+        erros.push('Data 1º Vencimento deve ser no mínimo 3 dias a partir de hoje (' + minVencStr.split('-').reverse().join('/') + '). Ajuste a data para corrigir.');
+      }
+      const [y, m, d] = dv.split('-').map(Number);
+      const diaSemana = new Date(y, m - 1, d).getDay(); // 0=domingo ... 5=sexta, 6=sábado
+      if (diaSemana !== 5) {
+        erros.push('Data 1º Vencimento (' + dv.split('-').reverse().join('/') + ') deve cair numa sexta-feira. Ajuste para a sexta-feira mais próxima que atenda ao mínimo de 3 dias.');
+      }
+    }
+  }
+
+  return erros;
+}
+
+// ══ GRADE DE PARCELAS (datas + valor) ═════════════════════════
+// Datas: a 1ª parcela é a própria Data 1º Vencimento; da 2ª em diante, cada uma cai no mesmo
+// dia do mês seguinte à anterior (não soma 30 dias corridos — decisão explícita do usuário em
+// 2026-07-28). Quando o mês seguinte não tem aquele dia (ex.: dia 31 caindo num mês de 30 dias,
+// ou 29/30/31 caindo em fevereiro), a data é ajustada para o último dia daquele mês.
+function calcularDatasParcelas(dataVenc1, numParcelas) {
+  const datas = [dataVenc1];
+  if (!dataVenc1 || !numParcelas || numParcelas < 2) return datas;
+  const [ano1, mes1, dia1] = dataVenc1.split('-').map(Number);
+  const m0 = mes1 - 1; // mês da 1ª parcela, 0-indexado (padrão JS Date)
+  for (let i = 1; i < numParcelas; i++) {
+    const mAlvo = m0 + i;
+    const ultimoDiaMesAlvo = new Date(ano1, mAlvo + 1, 0).getDate();
+    const diaAjustado = Math.min(dia1, ultimoDiaMesAlvo);
+    const d = new Date(ano1, mAlvo, diaAjustado);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    datas.push(`${yyyy}-${mm}-${dd}`);
+  }
+  return datas;
+}
+
+// Valor LÍQUIDO de cada parcela, gravado em REQUICOES!Valor_Parcela_1..12 (decisão do usuário
+// em 2026-09-11: Valor_Bruto passou a ser sempre o valor bruto TOTAL do pedido, sem dividir —
+// quem carrega o valor por parcela agora é essa série Valor_Parcela_N, sempre em termos líquidos,
+// ou seja, líquido total = Valor_Bruto total − Total_Impostos):
+// - À Vista/Cartão à Vista: só Valor_Parcela_1 = líquido total (documento único).
+// - Parcelado/Cartão Parcelado: líquido total ÷ número de parcelas, arredondado; a ÚLTIMA parcela
+//   absorve a diferença de arredondamento, para a soma bater exatamente com o líquido total.
+// - Cadenciado/Cartão Cadenciado: líquido total repetido INTEIRO em cada uma das N parcelas —
+//   cada uma é um documento gerador independente, não divide.
+function calcularValoresParcelas(tipo, liquidoTotal, numParcelas) {
+  const n = Math.max(1, numParcelas || 1);
+  const valores = new Array(n);
+  if (isTipoParceladoUnico(tipo) && n > 1) {
+    const base = Math.round((liquidoTotal / n) * 100) / 100;
+    let somaAnteriores = 0;
+    for (let i = 0; i < n - 1; i++) {
+      valores[i] = base;
+      somaAnteriores += base;
+    }
+    valores[n - 1] = Math.round((liquidoTotal - somaAnteriores) * 100) / 100;
+  } else {
+    // À Vista (n=1) e Cadenciado (n>=1): repete o líquido total cheio em cada parcela.
+    for (let i = 0; i < n; i++) valores[i] = liquidoTotal;
+  }
+  return valores;
+}
+
+// Lê as datas e valores de cada parcela "como estão na tela" no momento do envio: usa o que foi
+// digitado nos inputs editáveis da Prévia das Parcelas (parcela-data-input / parcela-valor-input)
+// quando eles existem — ou seja, respeita edição manual do solicitante para refletir negociações
+// com datas/valores fora do padrão (decisão do usuário em 2026-09-11) — e cai para os valores
+// calculados automaticamente (calcularDatasParcelas/calcularValoresParcelas) quando não há input
+// editável para aquele campo (Cadenciado não edita valor; À Vista não edita nada).
+function lerParcelasAtuais(tipo, numParcelas, liquidoTotal, dataVenc1) {
+  const datas = calcularDatasParcelas(dataVenc1, numParcelas);
+  const valores = calcularValoresParcelas(tipo, liquidoTotal, numParcelas);
+
+  // A parcela 1 nunca tem input próprio (ver atualizarPreviewParcelas) — datas[0] já vem correto
+  // de calcularDatasParcelas(dataVenc1, ...), ou seja, direto do campo "Data 1º Vencimento" do
+  // corpo do formulário. Por isso não checamos dataInputs.length === numParcelas aqui: a
+  // quantidade esperada de inputs de data é numParcelas - 1 (parcelas 2..N) quando há 2+ parcelas.
+  const dataInputs = document.querySelectorAll('.parcela-data-input');
+  dataInputs.forEach(inp => {
+    const idx = parseInt(inp.dataset.idx, 10);
+    if (!Number.isNaN(idx)) datas[idx] = inp.value || datas[idx];
+  });
+
+  const valorInputs = document.querySelectorAll('.parcela-valor-input');
+  if (valorInputs.length === numParcelas) {
+    valorInputs.forEach(inp => {
+      const idx = parseInt(inp.dataset.idx, 10);
+      valores[idx] = parseBRNumber(inp.value);
+    });
+  }
+
+  return { datas, valores };
+}
+
+// ══ COLETA DADOS ═════════════════════════════════════════════
+function coletarDados() {
+  const g = id => document.getElementById(id) ? document.getElementById(id).value : '';
+  const catParts = g('Categoria_CA').split('|');
+  // Calculado 1x e reaproveitado em Email_Notificacao e Email_Notificacao_2 (fallback do 2º
+  // destinatário) — evita duplicar a condição em 2 lugares e divergir por engano no futuro.
+  const isTesteInterno = g('BU_Centro_Custo') === 'BU_Teste';
+  const emailNotificacao = (g('Tipo_Despesa') === 'Receita' && g('Emissao_NF') === 'SIM' && !isTesteInterno)
+                        ? 'claudia@rebels.cc' // e-mail da contabilidade (producao)
+                        : g('Email_Aprovador');
+
+  return {
+    ID_Requisicao:    g('ID_Requisicao'),
+    Data_Criacao:     g('Data_Criacao'),
+    Status:           'Pendente',
+    BU_Centro_Custo:  g('BU_Centro_Custo'),
+    Nome_Requerente:  g('Nome_Requerente'),
+    Email_Requerente: g('Email_Requerente'),
+    // Email_Aprovador/Nome_Aprovador: em solicitações de emissão de NF (Receita + Emissao_NF=SIM),
+    // quem precisa aprovar/confirmar é sempre a Thaise (contadora externa, Keep Contábil) — não o
+    // aprovador padrão da BU (aba CENTROS_CUSTO). Sem este override, o Cenário 3 grava o aprovador
+    // da BU na REQUICOES e o link de aprovação recusa a Thaise por e-mail do Google não conferir
+    // com o aprovador da linha (ver histórico de bug de 2026-08-25). O campo do DOM (g('Email_Aprovador'))
+    // continua vindo do lookup dinâmico da BU só para validar() exigir que a BU tenha aprovador cadastrado.
+        Email_Aprovador:  (isEmissaoNFAtiva() && !isTesteInterno) ? 'thaise@keepcontabil.com.br' : g('Email_Aprovador'),
+    Nome_Aprovador:   (isEmissaoNFAtiva() && !isTesteInterno) ? 'Thaise' : g('Nome_Aprovador'),
+    CNPJ_CPF:         g('CNPJ_CPF').replace(/\D/g, ''),
+    Razao_Social:     g('Razao_Social'),
+    Nome_Fantasia:    g('Nome_Fantasia'),
+    Nome_extrato_Cartao: g('Nome_extrato_Cartao'),
+    Situacao_CNPJ:    g('Situacao_CNPJ'),
+    Salvar_Fornecedor: salvarFornecedor ? 'true' : 'false', // Make usa isso para gravar na aba FORNECEDORES_CLIENTES
+    Categoria_CA:     catParts[0] || '',
+    Categoria_Superior: g('Categoria_Superior'),
+    Cat_Superior_N1:  g('Cat_Superior_N1'),
+    Tipo_Despesa:     g('Tipo_Despesa'),
+    Emissao_NF:       g('Tipo_Despesa') === 'Receita' ? g('Emissao_NF') : 'NÃO',
+    // Email_Notificacao: calculado aqui (em vez de via if() no Make) para evitar bug do editor
+    // de fórmulas do Make — quando Emissão de NF = SIM, notifica a contabilidade em vez do aprovador da BU.
+    Email_Notificacao: emailNotificacao,
+    // Email_Notificacao_2: 2º destinatário do e-mail de solicitação (módulo 12 do Cenário 2).
+    // Só usado para incluir a contadora externa nas solicitações de emissão de NF; fora desse
+    // caso repete Email_Notificacao (nunca fica vazio) para não quebrar o campo "To" do Gmail no
+    // Make, que já deu erro de e-mail inválido/vazio antes neste projeto (ver lição de produção).
+        Email_Notificacao_2: (isEmissaoNFAtiva() && !isTesteInterno)
+                          ? 'thaise@keepcontabil.com.br' // contadora externa (producao)
+                          : emailNotificacao,
+    // Textos condicionais de NF pré-calculados aqui (em vez de if() no Make) — o if() do Make
+    // se mostrou não-confiável para comparação de string (mesmo bug do Email_Notificacao acima,
+    // confirmado de novo em teste ponta a ponta em 2026-07-16): sempre resolve para o ramo "then"
+    // independente do valor real da condição. Os 4 textos abaixo são simples referências de campo
+    // no Make (sem função/if()), e os 3 usados em URL (Assunto_Resultado/Linha_Decisao/Label_*)
+    // já vêm URL-encoded para não quebrar a querystring dos links Aprovar/Rejeitar.
+    Assunto_Solicitacao: (g('Tipo_Despesa') === 'Receita' && g('Emissao_NF') === 'SIM')
+                          ? '[Rebels CA] Solicitação de Emissão de NF — '
+                          : '[Rebels CA] Nova Requisição para Aprovação — ',
+    Assunto_Resultado: encodeURIComponent((g('Tipo_Despesa') === 'Receita' && g('Emissao_NF') === 'SIM')
+                          ? '[Rebels CA] Retorno de Emissão de NF — '
+                          : '[Rebels CA] Resultado da Requisição — '),
+    Linha_Decisao: encodeURIComponent((g('Tipo_Despesa') === 'Receita' && g('Emissao_NF') === 'SIM')
+                          ? 'Emissão de NF de'
+                          : 'Decisão de'),
+    Label_Aprovado: encodeURIComponent((g('Tipo_Despesa') === 'Receita' && g('Emissao_NF') === 'SIM')
+                          ? 'NF emitida'
+                          : 'aprovado'),
+    Label_Rejeitado: encodeURIComponent((g('Tipo_Despesa') === 'Receita' && g('Emissao_NF') === 'SIM')
+                          ? 'NF não emitida'
+                          : 'rejeitado'),
+    // Texto_Botao_Aprovar/Texto_Botao_Rejeitar: rótulo dos 2 botões do e-mail de solicitação
+    // (módulo 12 do Cenário 2). Vão direto no corpo JSON (não em URL) — sem encodeURIComponent.
+    // Is_Emissao_NF_Ativa: flag simples repassada via query string (por isso encoded) para a
+    // página intermediária de rejeição (formulario_rejeicao.html) adaptar o texto quando o botão
+    // "Solicitar mais informação" for clicado num contexto de emissão de NF.
+    Texto_Botao_Aprovar: isEmissaoNFAtiva() ? '✅ Confirmar emissão da NF' : '✅ APROVAR',
+    Texto_Botao_Rejeitar: isEmissaoNFAtiva() ? '❌ Solicitar mais informação' : '❌ REJEITAR',
+    Is_Emissao_NF_Ativa: encodeURIComponent(isEmissaoNFAtiva() ? 'true' : 'false'),
+    Descricao:        g('Descricao'),
+    Numero_Documento: g('Numero_Documento'),
+    Data_Competencia: g('Data_Competencia'),
+    // Valor_Bruto enviado à REQUICOES é sempre o valor bruto TOTAL do pedido (não divide mais por
+    // parcela — decisão do usuário em 2026-09-11). Quem carrega o valor por parcela é a série
+    // Valor_Parcela_1..12 abaixo (líquido = Valor_Bruto − Total_Impostos, ver calcularValoresParcelas).
+    Valor_Bruto:      parseBRNumber(g('Valor_Bruto')) || 0,
+    Tipo_Pagamento:   g('Tipo_Pagamento'),
+    Data_Vencimento:  g('Data_Vencimento'),
+    // Datas de vencimento e valores líquidos de cada parcela — ver lerParcelasAtuais(). Respeita
+    // edição manual feita na Prévia das Parcelas (decisão do usuário em 2026-09-11, para refletir
+    // negociações com datas/valores fora do padrão de 30 dias / divisão igual); cai para o cálculo
+    // automático (calcularDatasParcelas/calcularValoresParcelas) quando não há edição manual.
+    // Venc_Parcela_1 é sempre a Data 1º Vencimento salvo edição manual. REQUICOES só tem colunas
+    // até Venc_Parcela_12/Valor_Parcela_12 (validado em validar()).
+    ...(function() {
+      const tipoAtual = g('Tipo_Pagamento');
+      const numParcelasInt = isTipoParcelado(tipoAtual) ? (parseInt(g('Num_Parcelas'), 10) || 1) : 1;
+      const brutoNum = parseBRNumber(g('Valor_Bruto')) || 0;
+      const totalImpostosNum = parseFloat((g('Total_Impostos') || '0').replace(',', '.')) || 0;
+      const liquidoTotal = Math.round((brutoNum - totalImpostosNum) * 100) / 100;
+      const { datas, valores } = lerParcelasAtuais(tipoAtual, numParcelasInt, liquidoTotal, g('Data_Vencimento'));
+      const out = {};
+      for (let n = 1; n <= 12; n++) {
+        out['Venc_Parcela_' + n] = datas[n - 1] || '';
+        out['Valor_Parcela_' + n] = (valores[n - 1] !== undefined) ? valores[n - 1] : '';
+      }
+      return out;
+    })(),
+    Num_Parcelas:     isTipoParcelado(g('Tipo_Pagamento')) ? (parseInt(g('Num_Parcelas'), 10) || '') : '',
+    // Pagamento_Cadenciado (antes NF_Cadenciada): indica que cada parcela é um documento gerador
+    // independente, com sua própria emissão de NF — passa a ser derivado direto do Tipo de
+    // Parcelamento (Cadenciado/Cartão Cadenciado), sem campo próprio no formulário (decisão do
+    // usuário em 2026-07-28: a mesma escolha já indica o fato tanto para pagamento quanto para NF).
+    Pagamento_Cadenciado: isTipoCadenciado(g('Tipo_Pagamento')) ? 'SIM' : 'NÃO',
+    // Linha_Parcelamento: fragmento HTML pronto (mesmo padrão <tr> das outras linhas da tabela
+    // dos e-mails Gmail no Make) para inserir logo após a linha "Tipo de Pagamento". Calculado
+    // aqui em vez de via if() no Make, seguindo o mesmo padrão de Email_Notificacao/Assunto_*
+    // acima (o if() do Make não é confiável para comparação de string). Vazio quando não é
+    // parcelado. Detalhamento completo (data+valor por parcela) fica para uma 2ª etapa — por ora
+    // mantém só o resumo "Parcelado/Cadenciado em Nx", já usando o novo campo Pagamento_Cadenciado.
+    Linha_Parcelamento: isTipoParcelado(g('Tipo_Pagamento'))
+      ? '<tr><td style="padding:8px;border:1px solid #ddd;background:#f5f5f5"><strong>Parcelamento</strong></td><td style="padding:8px;border:1px solid #ddd">' +
+        (isTipoCadenciado(g('Tipo_Pagamento')) ? 'Cadenciado' : 'Parcelado') + ' em ' +
+        (parseInt(g('Num_Parcelas'), 10) || '?') + 'x' +
+        (isTipoCadenciado(g('Tipo_Pagamento'))
+          ? ' — <strong style="color:#B7791F;">documento gerador por parcela</strong>'
+          : '') +
+        '</td></tr>'
+      : '',
+    // Linha_Parcelamento_URL: mesma linha acima, mas URL-encoded — para passar pelos links
+    // Aprovar/Rejeitar (query string) até o Cenário 3, seguindo o mesmo padrão já usado para
+    // Assunto_Resultado/Linha_Decisao/Label_Aprovado/Label_Rejeitado (ver comentário acima).
+    // O Cenário 3 recebe isso como {{1.linha_parcelamento}} (webhook normaliza para minúsculo)
+    // e usa direto no HTML do e-mail de confirmação, sem precisar reconstruir no Make.
+    Linha_Parcelamento_URL: encodeURIComponent(isTipoParcelado(g('Tipo_Pagamento'))
+      ? '<tr><td style="padding:8px 0;border-bottom:1px solid #f0f0f0;color:#999;">Parcelamento</td><td style="padding:8px 0;border-bottom:1px solid #f0f0f0;text-align:right;">' +
+                                                       (isTipoCadenciado(g('Tipo_Pagamento')) ? 'Cadenciado' : 'Parcelado') + ' em ' +
+                                                       (parseInt(g('Num_Parcelas'), 10) || '?') + 'x' +
+                                                       (isTipoCadenciado(g('Tipo_Pagamento'))
+                                                                  ? ' — <strong style="color:#B7791F;">documento gerador por parcela</strong>'
+                                                                  : '') +
+                                                       '</td></tr>'
+                                                     : ''),
+    ISS:      parseBRNumber(g('ISS')),
+    PIS:      parseBRNumber(g('PIS')),
+    COFINS:   parseBRNumber(g('COFINS')),
+    CSLL:     parseBRNumber(g('CSLL')),
+    IRPJ:     parseBRNumber(g('IRPJ')),
+    INSS:     parseBRNumber(g('INSS')),
+    Outros:   parseBRNumber(g('Outros')),
+    Total_Impostos: parseFloat(g('Total_Impostos').replace(',','.')) || 0,
+    Observacoes: g('Observacoes')
+  };
+}
+
+// ══ ENVIO ════════════════════════════════════════════════════
+document.getElementById('form-req').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  document.getElementById('msg-success').style.display = 'none';
+  document.getElementById('msg-error').style.display = 'none';
+
+  const btn = this.querySelector('.btn-submit');
+  btn.textContent = 'Validando...';
+  btn.disabled = true;
+
+  const erros = await validar();
+  if (erros.length > 0) {
+    document.getElementById('msg-error-text').textContent =
+      'Atenção: ' + erros.join(' | ');
+    document.getElementById('msg-error').style.display = 'block';
+    document.getElementById('msg-error').scrollIntoView({ behavior: 'smooth' });
+    btn.textContent = 'Enviar Requisição →';
+    btn.disabled = false;
+    return;
+  }
+
+  btn.textContent = 'Enviando...';
+
+  try {
+    await fetch(MAKE_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(coletarDados())
+    });
+    document.getElementById('msg-success').style.display = 'block';
+    document.getElementById('msg-success').scrollIntoView({ behavior: 'smooth' });
+    btn.textContent = '✓ Enviado';
+  } catch(err) {
+    document.getElementById('msg-error-text').textContent =
+      'Erro de conexão. Verifique sua internet e tente novamente.';
+    document.getElementById('msg-error').style.display = 'block';
+    btn.textContent = 'Enviar Requisição →';
+    btn.disabled = false;
+  }
+});
+
+// ══ RESET ════════════════════════════════════════════════════
+function resetForm() {
+  if (!confirm('Limpar todos os campos?')) return;
+  document.getElementById('form-req').reset();
+  document.getElementById('row-parcelamento').style.display = 'none';
+  document.getElementById('Total_Impostos').value = '0,00';
+  document.getElementById('msg-success').style.display = 'none';
+  document.getElementById('msg-error').style.display = 'none';
+  fornecedorStatus = 'pendente';
+  salvarFornecedor = false;
+  init();
+}
+
+// ══ START ════════════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
