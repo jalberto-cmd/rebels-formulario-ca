@@ -1312,9 +1312,10 @@ function coletarDados() {
   const catParts = g('Categoria_CA').split('|');
   // Calculado 1x e reaproveitado em Email_Notificacao e Email_Notificacao_2 (fallback do 2º
   // destinatário) — evita duplicar a condição em 2 lugares e divergir por engano no futuro.
-  const emailNotificacao = (g('Tipo_Despesa') === 'Receita' && g('Emissao_NF') === 'SIM')
-                          ? 'claudia@rebels.cc' // e-mail da contabilidade (producao)
-                          : g('Email_Aprovador');
+  const isTesteInterno = g('BU_Centro_Custo') === 'BU_Teste';
+  const emailNotificacao = (g('Tipo_Despesa') === 'Receita' && g('Emissao_NF') === 'SIM' && !isTesteInterno)
+                        ? 'claudia@rebels.cc' // e-mail da contabilidade (producao)
+                        : g('Email_Aprovador');
 
   return {
     ID_Requisicao:    g('ID_Requisicao'),
@@ -1329,8 +1330,8 @@ function coletarDados() {
     // da BU na REQUICOES e o link de aprovação recusa a Thaise por e-mail do Google não conferir
     // com o aprovador da linha (ver histórico de bug de 2026-08-25). O campo do DOM (g('Email_Aprovador'))
     // continua vindo do lookup dinâmico da BU só para validar() exigir que a BU tenha aprovador cadastrado.
-    Email_Aprovador:  isEmissaoNFAtiva() ? 'thaise@keepcontabil.com.br' : g('Email_Aprovador'),
-    Nome_Aprovador:   isEmissaoNFAtiva() ? 'Thaise' : g('Nome_Aprovador'),
+        Email_Aprovador:  (isEmissaoNFAtiva() && !isTesteInterno) ? 'thaise@keepcontabil.com.br' : g('Email_Aprovador'),
+    Nome_Aprovador:   (isEmissaoNFAtiva() && !isTesteInterno) ? 'Thaise' : g('Nome_Aprovador'),
     CNPJ_CPF:         g('CNPJ_CPF').replace(/\D/g, ''),
     Razao_Social:     g('Razao_Social'),
     Nome_Fantasia:    g('Nome_Fantasia'),
@@ -1349,7 +1350,7 @@ function coletarDados() {
     // Só usado para incluir a contadora externa nas solicitações de emissão de NF; fora desse
     // caso repete Email_Notificacao (nunca fica vazio) para não quebrar o campo "To" do Gmail no
     // Make, que já deu erro de e-mail inválido/vazio antes neste projeto (ver lição de produção).
-    Email_Notificacao_2: isEmissaoNFAtiva()
+        Email_Notificacao_2: (isEmissaoNFAtiva() && !isTesteInterno)
                           ? 'thaise@keepcontabil.com.br' // contadora externa (producao)
                           : emailNotificacao,
     // Textos condicionais de NF pré-calculados aqui (em vez de if() no Make) — o if() do Make
