@@ -417,6 +417,7 @@ table.impostos tr:last-child  td { background: #FFF2CC; }
             <select id="Forma_Pagto" onchange="onFormaPagtoChange()">
               <option value="">— selecione —</option>
               <option value="Boleto">Boleto</option>
+              <option value="Cartão Crédito">Cartão Crédito</option>
               <option value="PIX">PIX</option>
             </select>
           </td>
@@ -761,8 +762,8 @@ function aplicarFormaPagtoFornecedor(d) {
   const naBase = !!d && (d.found_in_base === true || d.found_in_base === 'true');
   let forma = '';
   if (naBase) {
-    const n = String(d.forma_pagto || '').trim().toLowerCase();
-    forma = n === 'boleto' ? 'Boleto' : (n === 'pix' ? 'PIX' : '');
+    const n = String(d.forma_pagto || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    forma = n === 'boleto' ? 'Boleto' : (n === 'pix' ? 'PIX' : ((n === 'cartao credito' || n === 'cartao de credito') ? 'Cartão Crédito' : ''));
   }
   document.getElementById('Forma_Pagto').value = forma;
   onFormaPagtoChange();
