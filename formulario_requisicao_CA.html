@@ -137,7 +137,7 @@ table.impostos tr:last-child  td { background: #FFF2CC; }
 
 /* ── Parcelamento (linha condicional dentro da seção 3) ── */
 #row-parcelamento { display: none; }
-#row-forma-pagto, #pix-lbl, #pix-val { display: none; }
+#pix-lbl, #pix-val { display: none; }
 
 /* ── Aprovação (readonly) ── */
 #sec-aprovacao { display: none; }
@@ -395,19 +395,6 @@ table.impostos tr:last-child  td { background: #FFF2CC; }
           <td class="lbl">Data Competência <span class="req">*</span></td>
           <td class="val" colspan="5"><input type="date" id="Data_Competencia" required></td>
         </tr>
-        <tr>
-          <td class="lbl">Tipo de Parcelamento <span class="req">*</span></td>
-          <td class="val" colspan="2">
-            <select id="Tipo_Pagamento" required onchange="onTipoPagamentoChange()">
-              <option value="">— selecione —</option>
-              <option value="À Vista">À Vista</option>
-              <option value="Parcelado">Parcelado</option>
-              <option value="Cadenciado">Cadenciado</option>
-            </select>
-          </td>
-          <td class="lbl">Data 1º Vencimento <span class="req">*</span></td>
-          <td class="val" colspan="2"><input type="date" id="Data_Vencimento" required oninput="atualizarPreviewParcelas()"></td>
-        </tr>
         <tr id="row-forma-pagto">
           <td class="lbl">Forma de Pagto <span class="req">*</span></td>
           <td class="val" colspan="2">
@@ -420,6 +407,19 @@ table.impostos tr:last-child  td { background: #FFF2CC; }
           </td>
           <td class="lbl" id="pix-lbl">Chave PIX <span class="req">*</span></td>
           <td class="val" id="pix-val" colspan="2"><input type="text" id="Chave_PIX" placeholder="CPF/CNPJ, e-mail, telefone ou chave aleatória"></td>
+        </tr>
+        <tr>
+          <td class="lbl">Tipo de Parcelamento <span class="req">*</span></td>
+          <td class="val" colspan="2">
+            <select id="Tipo_Pagamento" required onchange="onTipoPagamentoChange()">
+              <option value="">— selecione —</option>
+              <option value="À Vista">À Vista</option>
+              <option value="Parcelado">Parcelado</option>
+              <option value="Cadenciado">Cadenciado</option>
+            </select>
+          </td>
+          <td class="lbl">Data 1º Vencimento <span class="req">*</span></td>
+          <td class="val" colspan="2"><input type="date" id="Data_Vencimento" required oninput="atualizarPreviewParcelas()"></td>
         </tr>
         <tr id="row-parcelamento">
           <td class="lbl">Número de Parcelas <span class="req">*</span></td>
@@ -735,18 +735,18 @@ function atualizarLinhaNFCartao(tipo) {
 // Linha "Forma de Pagto" só aparece para Categoria do tipo Despesa; "Chave PIX" (na mesma linha,
 // à direita) só quando Forma de Pagto = PIX. Ao ocultar, os campos são limpos.
 function onFormaPagtoChange() {
-  const ehDespesa = document.getElementById('Tipo_Despesa').value === 'Despesa';
+  const ehReceita = document.getElementById('Tipo_Despesa').value === 'Receita';
   const ehPix = document.getElementById('Forma_Pagto').value === 'PIX';
-  const mostrarPix = (ehDespesa && ehPix) ? 'table-cell' : 'none';
+  const mostrarPix = (!ehReceita && ehPix) ? 'table-cell' : 'none';
   document.getElementById('pix-lbl').style.display = mostrarPix;
   document.getElementById('pix-val').style.display = mostrarPix;
   if (!ehPix) document.getElementById('Chave_PIX').value = '';
 }
 
 function atualizarLinhaFormaPagto(tipo) {
-  const ehDespesa = tipo === 'Despesa';
-  document.getElementById('row-forma-pagto').style.display = ehDespesa ? 'table-row' : 'none';
-  if (!ehDespesa) {
+  const ehReceita = tipo === 'Receita';
+  document.getElementById('row-forma-pagto').style.display = ehReceita ? 'none' : 'table-row';
+  if (ehReceita) {
     document.getElementById('Forma_Pagto').value = '';
     document.getElementById('Chave_PIX').value = '';
   }
