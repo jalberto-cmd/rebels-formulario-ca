@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Requisição de Lançamento — Rebels</title>
+<title>Cabeça de Donos - Solicitações Financeiras</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -137,7 +137,7 @@ table.impostos tr:last-child  td { background: #FFF2CC; }
 
 /* ── Parcelamento (linha condicional dentro da seção 3) ── */
 #row-parcelamento { display: none; }
-#row-forma-pagto, #row-pix { display: none; }
+#row-forma-pagto, #pix-lbl, #pix-val { display: none; }
 
 /* ── Aprovação (readonly) ── */
 #sec-aprovacao { display: none; }
@@ -187,7 +187,7 @@ table.impostos tr:last-child  td { background: #FFF2CC; }
   <!-- ══ CABEÇALHO ══════════════════════════════════════════════ -->
   <div class="header">
     <div class="header-left">
-      <h1>Rebels — Manual de Donos</h1>
+      <h1>Cabeça de Donos - Solicitações Financeiras</h1>
       <p>Formulário de Requisição de Lançamento no Conta Azul</p>
     </div>
     <div class="header-right">
@@ -388,9 +388,8 @@ table.impostos tr:last-child  td { background: #FFF2CC; }
         <tr>
           <td class="lbl">Serviço Prestado <span class="req">*</span></td>
           <td class="val" colspan="5"><textarea id="Descricao" required style="background-color:#fff0f0" placeholder="Descreva o motivo ou detalhes do lançamento
-Especifique a Chave PIX
 ** Texto deve ser curto **
-*** está informação ajudará a identificação no Conta Azul ***"></textarea></td>
+*** esta informação ajudará a identificação no Conta Azul ***"></textarea></td>
         </tr>
         <tr>
           <td class="lbl">Data Competência <span class="req">*</span></td>
@@ -414,17 +413,15 @@ Especifique a Chave PIX
         </tr>
         <tr id="row-forma-pagto">
           <td class="lbl">Forma de Pagto <span class="req">*</span></td>
-          <td class="val" colspan="5">
+          <td class="val" colspan="2">
             <select id="Forma_Pagto" onchange="onFormaPagtoChange()">
               <option value="">— selecione —</option>
               <option value="Boleto">Boleto</option>
               <option value="PIX">PIX</option>
             </select>
           </td>
-        </tr>
-        <tr id="row-pix">
-          <td class="lbl">Chave PIX <span class="req">*</span></td>
-          <td class="val" colspan="5"><input type="text" id="Chave_PIX" placeholder="CPF/CNPJ, e-mail, telefone ou chave aleatória"></td>
+          <td class="lbl" id="pix-lbl">Chave PIX <span class="req">*</span></td>
+          <td class="val" id="pix-val" colspan="2"><input type="text" id="Chave_PIX" placeholder="CPF/CNPJ, e-mail, telefone ou chave aleatória"></td>
         </tr>
         <tr id="row-parcelamento">
           <td class="lbl">Número de Parcelas <span class="req">*</span></td>
@@ -737,12 +734,14 @@ function atualizarLinhaNFCartao(tipo) {
 }
 
 // ══ FORMA DE PAGTO / CHAVE PIX ═══════════════════════════════
-// Linha "Forma de Pagto" só aparece para Categoria do tipo Despesa; "Chave PIX" só quando
-// Forma de Pagto = PIX. Ao ocultar, os campos são limpos.
+// Linha "Forma de Pagto" só aparece para Categoria do tipo Despesa; "Chave PIX" (na mesma linha,
+// à direita) só quando Forma de Pagto = PIX. Ao ocultar, os campos são limpos.
 function onFormaPagtoChange() {
   const ehDespesa = document.getElementById('Tipo_Despesa').value === 'Despesa';
   const ehPix = document.getElementById('Forma_Pagto').value === 'PIX';
-  document.getElementById('row-pix').style.display = (ehDespesa && ehPix) ? 'table-row' : 'none';
+  const mostrarPix = (ehDespesa && ehPix) ? 'table-cell' : 'none';
+  document.getElementById('pix-lbl').style.display = mostrarPix;
+  document.getElementById('pix-val').style.display = mostrarPix;
   if (!ehPix) document.getElementById('Chave_PIX').value = '';
 }
 
