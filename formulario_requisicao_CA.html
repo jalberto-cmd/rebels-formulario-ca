@@ -137,6 +137,7 @@ table.impostos tr:last-child  td { background: #FFF2CC; }
 
 /* ── Parcelamento (linha condicional dentro da seção 3) ── */
 #row-parcelamento { display: none; }
+#row-forma-pagto, #row-pix { display: none; }
 
 /* ── Aprovação (readonly) ── */
 #sec-aprovacao { display: none; }
@@ -392,10 +393,8 @@ Especifique a Chave PIX
 *** está informação ajudará a identificação no Conta Azul ***"></textarea></td>
         </tr>
         <tr>
-          <td class="lbl">Nº Documento</td>
-          <td class="val" colspan="2"><input type="text" id="Numero_Documento" placeholder="NF, boleto, recibo..."></td>
           <td class="lbl">Data Competência <span class="req">*</span></td>
-          <td class="val" colspan="2"><input type="date" id="Data_Competencia" required></td>
+          <td class="val" colspan="5"><input type="date" id="Data_Competencia" required></td>
         </tr>
         <tr>
           <td class="lbl">Tipo de Parcelamento <span class="req">*</span></td>
@@ -412,6 +411,20 @@ Especifique a Chave PIX
           </td>
           <td class="lbl">Data 1º Vencimento <span class="req">*</span></td>
           <td class="val" colspan="2"><input type="date" id="Data_Vencimento" required oninput="atualizarPreviewParcelas()"></td>
+        </tr>
+        <tr id="row-forma-pagto">
+          <td class="lbl">Forma de Pagto <span class="req">*</span></td>
+          <td class="val" colspan="5">
+            <select id="Forma_Pagto" onchange="onFormaPagtoChange()">
+              <option value="">— selecione —</option>
+              <option value="Boleto">Boleto</option>
+              <option value="PIX">PIX</option>
+            </select>
+          </td>
+        </tr>
+        <tr id="row-pix">
+          <td class="lbl">Chave PIX <span class="req">*</span></td>
+          <td class="val" colspan="5"><input type="text" id="Chave_PIX" placeholder="CPF/CNPJ, e-mail, telefone ou chave aleatória"></td>
         </tr>
         <tr id="row-parcelamento">
           <td class="lbl">Número de Parcelas <span class="req">*</span></td>
@@ -700,6 +713,7 @@ function onCategoriaChange() {
     document.getElementById('Cat_Superior_N1').value = '';
     document.getElementById('Tipo_Despesa').value = '';
     atualizarLinhaNFCartao('');
+    atualizarLinhaFormaPagto('');
     return;
   }
   const parts = val.split('|');
@@ -707,6 +721,7 @@ function onCategoriaChange() {
   document.getElementById('Cat_Superior_N1').value = parts[2] || '';
   document.getElementById('Tipo_Despesa').value = parts[3] || '';
   atualizarLinhaNFCartao(parts[3] || '');
+  atualizarLinhaFormaPagto(parts[3] || '');
 }
 
 // "Emissão de NF" aparece só para Categoria do tipo Receita. Ao esconder o campo, seu valor
@@ -719,6 +734,40 @@ function atualizarLinhaNFCartao(tipo) {
   if (!isReceita) document.getElementById('Emissao_NF').value = 'NÃO';
 
   atualizarMinVencimento();
+}
+
+// ══ FORMA DE PAGTO / CHAVE PIX ═══════════════════════════════
+// Linha "Forma de Pagto" só aparece para Categoria do tipo Despesa; "Chave PIX" só quando
+// Forma de Pagto = PIX. Ao ocultar, os campos são limpos.
+function onFormaPagtoChange() {
+  const ehDespesa = document.getElementById('Tipo_Despesa').value === 'Despesa';
+  const ehPix = document.getElementById('Forma_Pagto').value === 'PIX';
+  document.getElementById('row-pix').style.display = (ehDespesa && ehPix) ? 'table-row' : 'none';
+  if (!ehPix) document.getElementById('Chave_PIX').value = '';
+}
+
+function atualizarLinhaFormaPagto(tipo) {
+  const ehDespesa = tipo === 'Despesa';
+  document.getElementById('row-forma-pagto').style.display = ehDespesa ? 'table-row' : 'none';
+  if (!ehDespesa) {
+    document.getElementById('Forma_Pagto').value = '';
+    document.getElementById('Chave_PIX').value = '';
+  }
+  onFormaPagtoChange();
+}
+
+// Aplica Forma de Pagto / Chave PIX vindas do cadastro do fornecedor (lookup). Sem dados (ou
+// fornecedor fora da base) => limpa os dois campos, para não herdar PIX de outro fornecedor.
+function aplicarFormaPagtoFornecedor(d) {
+  const naBase = !!d && (d.found_in_base === true || d.found_in_base === 'true');
+  let forma = '';
+  if (naBase) {
+    const n = String(d.forma_pagto || '').trim().toLowerCase();
+    forma = n === 'boleto' ? 'Boleto' : (n === 'pix' ? 'PIX' : '');
+  }
+  document.getElementById('Forma_Pagto').value = forma;
+  onFormaPagtoChange();
+  document.getElementById('Chave_PIX').value = (forma === 'PIX') ? String(d.chave_pix || '').trim() : '';
 }
 
 // ══ DATA VENCIMENTO → REGRA DUPLA (emissão de NF vs. normal) ═══
@@ -956,6 +1005,7 @@ function preencherCamposFornecedor(d) {
   if (d.nome_fantasia       !== undefined) document.getElementById('Nome_Fantasia').value       = d.nome_fantasia       || '';
   if (d.nome_extrato_cartao !== undefined) document.getElementById('Nome_extrato_Cartao').value = d.nome_extrato_cartao || '';
   if (d.situacao_cnpj       !== undefined) document.getElementById('Situacao_CNPJ').value       = d.situacao_cnpj       || '';
+  aplicarFormaPagtoFornecedor(d); // Forma de Pagto / Chave PIX (só preenche se found_in_base; senão limpa)
 }
 
 // ══ SITUAÇÃO 1 e 2: CNPJ / CPF ═══════════════════════════════
@@ -1017,6 +1067,7 @@ async function buscarCNPJ() {
       '⚠ CPF não encontrado na base — preencha os campos manualmente. Será gravado ao submeter.',
       '#b07000');
     salvarFornecedor = true;
+    aplicarFormaPagtoFornecedor(null);
     return;
   }
 
@@ -1047,6 +1098,7 @@ async function buscarCNPJ() {
       '❌ CNPJ não encontrado na Receita Federal. Verifique o número ou use apenas o Nome Fantasia.',
       '#C00000');
     salvarFornecedor = false;
+    aplicarFormaPagtoFornecedor(null);
   }
 }
 
@@ -1089,6 +1141,7 @@ async function buscarPorNomeFantasia() {
     setFornecedorStatus('novo',
       '⚠ Nome Fantasia não encontrado na base. Será gravado ao submeter.',
       '#b07000');
+    aplicarFormaPagtoFornecedor(null);
 
     const candidatos = await buscarCandidatosFornecedor(nomeFantasia);
     if (candidatos.length > 0) {
@@ -1250,6 +1303,29 @@ function aceitarSugestaoFuzzy(idx) {
   setFornecedorStatus('ok', '✔ Fornecedor confirmado pelo usuário (selecionado na lista)', '#2a7a2a');
   salvarFornecedor = false;
   esconderSugestaoFuzzy();
+  // O cache da busca aproximada não traz Forma de Pagto / Chave PIX: consulta o cadastro por CNPJ
+  // (somente esses 2 campos; sem alterar status/salvarFornecedor).
+  const cnpjSug = String(registro.cnpj || '').replace(/\D/g, '');
+  if (cnpjSug.length === 11 || cnpjSug.length === 14) buscarFormaPagtoPorCnpj(cnpjSug);
+}
+
+let _formaPagtoBuscaId = 0;
+async function buscarFormaPagtoPorCnpj(raw) {
+  const meuId = ++_formaPagtoBuscaId;
+  const cnpjAtual = () => document.getElementById('CNPJ_CPF').value.replace(/\D/g, '');
+  try {
+    const r = await fetch(MAKE_LOOKUP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cnpj: raw, tipo: raw.length === 11 ? 'cpf' : 'cnpj' })
+    });
+    if (!r.ok) return;
+    const d = await r.json();
+    if (meuId !== _formaPagtoBuscaId || cnpjAtual() !== raw) return; // usuário já mudou o fornecedor
+    aplicarFormaPagtoFornecedor(d);
+  } catch(e) {
+    console.warn('buscarFormaPagtoPorCnpj:', e);
+  }
 }
 
 function rejeitarSugestaoFuzzy() {
@@ -1313,6 +1389,10 @@ async function validar() {
   req('Valor_Bruto', 'Valor Bruto');
   req('Tipo_Pagamento', 'Tipo de Parcelamento');
   req('Data_Vencimento', 'Data 1º Vencimento');
+  if (document.getElementById('Tipo_Despesa').value === 'Despesa') {
+    req('Forma_Pagto', 'Forma de Pagto');
+    if (document.getElementById('Forma_Pagto').value === 'PIX') req('Chave_PIX', 'Chave PIX');
+  }
 
   // ── Grafia brasileira nos campos numéricos (Valor Bruto + 7 impostos) ──
   // Bloqueia o envio se algum valor preenchido não estiver em grafia brasileira válida
@@ -1571,7 +1651,8 @@ function coletarDados() {
     Texto_Botao_Rejeitar: isEmissaoNFAtiva() ? '❌ Solicitar mais informação' : '❌ REJEITAR',
     Is_Emissao_NF_Ativa: encodeURIComponent(isEmissaoNFAtiva() ? 'true' : 'false'),
     Descricao:        g('Descricao'),
-    Numero_Documento: g('Numero_Documento'),
+    Forma_Pagto:      (g('Tipo_Despesa') === 'Despesa') ? g('Forma_Pagto') : '',
+    Chave_PIX:        (g('Tipo_Despesa') === 'Despesa' && g('Forma_Pagto') === 'PIX') ? g('Chave_PIX').trim() : '',
     Data_Competencia: g('Data_Competencia'),
     // Valor_Bruto enviado à REQUICOES é sempre o valor bruto TOTAL do pedido (não divide mais por
     // parcela — decisão do usuário em 2026-09-11). Quem carrega o valor por parcela é a série
@@ -1692,6 +1773,7 @@ function resetForm() {
   if (!confirm('Limpar todos os campos?')) return;
   document.getElementById('form-req').reset();
   document.getElementById('row-parcelamento').style.display = 'none';
+  atualizarLinhaFormaPagto('');
   document.getElementById('Total_Impostos').value = '0,00';
   document.getElementById('msg-success').style.display = 'none';
   document.getElementById('msg-error').style.display = 'none';
