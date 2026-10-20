@@ -403,11 +403,23 @@ table.impostos tr:last-child  td { background: #FFF2CC; }
               <option value="Boleto">Boleto</option>
               <option value="Cartão Crédito">Cartão Crédito</option>
               <option value="PIX">PIX</option>
+              <option value="Depósito Banco">Depósito Banco</option>
             </select>
           </td>
           <td class="lbl" id="pix-lbl">Chave PIX <span class="req">*</span></td>
           <td class="val" id="pix-val" colspan="2"><input type="text" id="Chave_PIX" placeholder="CPF/CNPJ, e-mail, telefone ou chave aleatória"></td>
         </tr>
+        <tr id="row-deposito" style="display:none">
+          <td class="lbl">Dados do Depósito <span class="req">*</span></td>
+          <td class="val" colspan="5">
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="Dep_Banco" inputmode="numeric" maxlength="3" placeholder="Código Banco (3 dígitos, ex.: 237)" oninput="this.value=this.value.replace(/\D/g,'')">
+              <input type="text" id="Dep_Agencia" inputmode="numeric" placeholder="Agência (só dígitos)" oninput="this.value=this.value.replace(/\D/g,'')">
+              <input type="text" id="Dep_Conta" placeholder="Conta com dígito (ex.: 12345-6)" oninput="this.value=this.value.replace(/[^0-9Xx-]/g,'')">
+            </div>
+          </td>
+        </tr>
+        <tr style="display:none"></tr><!-- preserva a alternância de cor das linhas seguintes -->
         <tr>
           <td class="lbl">Tipo de Parcelamento <span class="req">*</span></td>
           <td class="val" colspan="2">
@@ -737,10 +749,15 @@ function atualizarLinhaNFCartao(tipo) {
 function onFormaPagtoChange() {
   const ehReceita = document.getElementById('Tipo_Despesa').value === 'Receita';
   const ehPix = document.getElementById('Forma_Pagto').value === 'PIX';
+  const ehDeposito = !ehReceita && document.getElementById('Forma_Pagto').value === 'Depósito Banco';
   const mostrarPix = (!ehReceita && ehPix) ? 'table-cell' : 'none';
   document.getElementById('pix-lbl').style.display = mostrarPix;
   document.getElementById('pix-val').style.display = mostrarPix;
   if (!ehPix) document.getElementById('Chave_PIX').value = '';
+  document.getElementById('row-deposito').style.display = ehDeposito ? 'table-row' : 'none';
+  if (!ehDeposito) {
+    ['Dep_Banco', 'Dep_Agencia', 'Dep_Conta'].forEach(id => { document.getElementById(id).value = ''; });
+  }
 }
 
 function atualizarLinhaFormaPagto(tipo) {
@@ -760,11 +777,18 @@ function aplicarFormaPagtoFornecedor(d) {
   let forma = '';
   if (naBase) {
     const n = String(d.forma_pagto || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    forma = n === 'boleto' ? 'Boleto' : (n === 'pix' ? 'PIX' : ((n === 'cartao credito' || n === 'cartao de credito') ? 'Cartão Crédito' : ''));
+    forma = n === 'boleto' ? 'Boleto' : (n === 'pix' ? 'PIX' : ((n === 'cartao credito' || n === 'cartao de credito') ? 'Cartão Crédito' : (n === 'deposito banco' ? 'Depósito Banco' : '')));
   }
   document.getElementById('Forma_Pagto').value = forma;
   onFormaPagtoChange();
-  document.getElementById('Chave_PIX').value = (forma === 'PIX') ? String(d.chave_pix || '').trim() : '';
+  const chaveFornecedor = String((d && d.chave_pix) || '').trim();
+  document.getElementById('Chave_PIX').value = (forma === 'PIX') ? chaveFornecedor : '';
+  // Depósito Banco: chave_pix guarda 'banco/agência/conta'; se não vier em exatamente 3 partes, deixa vazio.
+  const partesDep = (forma === 'Depósito Banco') ? chaveFornecedor.split('/').map(s => s.trim()) : [];
+  const depOk = partesDep.length === 3;
+  document.getElementById('Dep_Banco').value   = depOk ? partesDep[0] : '';
+  document.getElementById('Dep_Agencia').value = depOk ? partesDep[1] : '';
+  document.getElementById('Dep_Conta').value   = depOk ? partesDep[2] : '';
 }
 
 // ══ DATA VENCIMENTO → REGRA DUPLA (emissão de NF vs. normal) ═══
@@ -1389,6 +1413,12 @@ async function validar() {
   if (document.getElementById('Tipo_Despesa').value === 'Despesa') {
     req('Forma_Pagto', 'Forma de Pagto');
     if (document.getElementById('Forma_Pagto').value === 'PIX') req('Chave_PIX', 'Chave PIX');
+    if (document.getElementById('Forma_Pagto').value === 'Depósito Banco') {
+      const limpo = id => { const el = document.getElementById(id); el.value = el.value.replace(/\s+/g, ''); return el.value; };
+      if (!/^\d{3}$/.test(limpo('Dep_Banco'))) erros.push('Código do Banco obrigatório — informe 3 dígitos (ex.: 237)');
+      if (!/^\d+$/.test(limpo('Dep_Agencia'))) erros.push('Agência obrigatória — informe somente dígitos');
+      if (!/^\d+-[0-9Xx]$/.test(limpo('Dep_Conta'))) erros.push('Conta obrigatória com dígito — formato 12345-6');
+    }
   }
 
   // ── Grafia brasileira nos campos numéricos (Valor Bruto + 7 impostos) ──
@@ -1649,7 +1679,9 @@ function coletarDados() {
     Is_Emissao_NF_Ativa: encodeURIComponent(isEmissaoNFAtiva() ? 'true' : 'false'),
     Descricao:        g('Descricao'),
     Forma_Pagto:      (g('Tipo_Despesa') === 'Despesa') ? g('Forma_Pagto') : '',
-    Chave_PIX:        (g('Tipo_Despesa') === 'Despesa' && g('Forma_Pagto') === 'PIX') ? g('Chave_PIX').trim() : '',
+    Chave_PIX:        (g('Tipo_Despesa') === 'Despesa' && g('Forma_Pagto') === 'PIX') ? g('Chave_PIX').trim()
+                    : ((g('Tipo_Despesa') === 'Despesa' && g('Forma_Pagto') === 'Depósito Banco')
+                        ? [g('Dep_Banco'), g('Dep_Agencia'), g('Dep_Conta')].map(s => String(s).replace(/\s+/g, '')).join('/') : ''),
     Data_Competencia: g('Data_Competencia'),
     // Valor_Bruto enviado à REQUICOES é sempre o valor bruto TOTAL do pedido (não divide mais por
     // parcela — decisão do usuário em 2026-09-11). Quem carrega o valor por parcela é a série
