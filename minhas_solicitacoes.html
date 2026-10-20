@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cabeça de Donos - Minhas Solicitações</title>
+<style>
+  :root { --bg:#f4f5f7; --card:#fff; --ink:#1f2937; --mut:#6b7280; --line:#e5e7eb; --pri:#111827; --ok:#15803d; --warn:#b45309; --bad:#b91c1c; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; background:var(--bg); color:var(--ink); }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--mut); font-size: 14px; margin-bottom: 20px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
+  label { display:block; font-size: 13px; color: var(--mut); margin-bottom: 6px; }
+  input[type=text], input[type=email], select { width:100%; padding: 10px 12px; border:1px solid var(--line); border-radius: 8px; font-size: 15px; }
+  button { background: var(--pri); color:#fff; border:0; border-radius: 8px; padding: 10px 18px; font-size: 15px; cursor:pointer; }
+  button.sec { background:#fff; color:var(--ink); border:1px solid var(--line); }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  .row { display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; }
+  .row > div { flex:1; min-width:180px; }
+  .msg { margin-top: 12px; font-size: 14px; }
+  .msg.err { color: var(--bad); } .msg.ok { color: var(--ok); }
+  .top { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+  .who { font-size:14px; color:var(--mut); }
+  table { width:100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align:left; padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing:.04em; color: var(--mut); }
+  td.num { text-align:right; white-space:nowrap; }
+  .badge { display:inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight:600; background:#e5e7eb; }
+  .badge.aprovado { background:#dcfce7; color:var(--ok); }
+  .badge.pendente { background:#fef3c7; color:var(--warn); }
+  .badge.rejeitado { background:#fee2e2; color:var(--bad); }
+  .small { font-size: 12px; color: var(--mut); }
+  .hide { display:none; }
+  .tools { display:flex; gap:12px; margin-bottom: 12px; flex-wrap:wrap; }
+  .tools > * { flex:1; min-width: 160px; }
+  .empty { text-align:center; color:var(--mut); padding: 28px 0; }
+  .note { margin-top:14px; font-size:12px; color:var(--mut); }
+  @media (max-width: 700px) { th:nth-child(n+5), td:nth-child(n+5) { display:none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Cabeça de Donos - Minhas Solicitações</h1>
+  <div class="sub">Acompanhe somente as solicitações feitas por você.</div>
+
+  <!-- Passo 1: e-mail -->
+  <div id="p1" class="card">
+    <label for="email">Seu e-mail cadastrado</label>
+    <div class="row">
+      <div><input type="email" id="email" placeholder="nome@empresa.com" autocomplete="email"></div>
+      <div style="flex:0"><button id="btnCodigo">Enviar código</button></div>
+    </div>
+    <div id="m1" class="msg"></div>
+  </div>
+
+  <!-- Passo 2: código -->
+  <div id="p2" class="card hide">
+    <label for="codigo">Código de 6 dígitos enviado para <b id="emailMostrado"></b></label>
+    <div class="row">
+      <div><input type="text" id="codigo" inputmode="numeric" maxlength="6" placeholder="000000" autocomplete="one-time-code"></div>
+      <div style="flex:0"><button id="btnValidar">Entrar</button></div>
+    </div>
+    <div class="msg"><button class="sec" id="btnVoltar" type="button">Usar outro e-mail</button></div>
+    <div id="m2" class="msg"></div>
+  </div>
+
+  <!-- Passo 3: lista -->
+  <div id="p3" class="hide">
+    <div class="top">
+      <div class="who">Logado como <b id="quem"></b></div>
+      <div><button class="sec" id="btnAtualizar">Atualizar</button> <button class="sec" id="btnSair">Sair</button></div>
+    </div>
+    <h2 id="tituloAprovar" class="hide" style="font-size:16px;margin:0 0 8px">Para aprovar <span id="qtdAprovar" class="badge pendente"></span></h2>
+    <div id="blocoAprovar" class="card hide" style="margin-bottom:16px">
+      <div class="small" style="margin-bottom:10px">Solicitações pendentes atribuídas a você. A aprovação continua sendo feita pelo link do e-mail.</div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>ID</th><th>Data</th><th>Requerente</th><th>Fornecedor</th><th>BU</th><th>Categoria</th><th style="text-align:right">Valor</th><th>Tipo Pagto</th><th>Forma de Pagto</th><th>1º Pagto</th><th>Descrição</th></tr></thead>
+          <tbody id="corpoAprovar"></tbody>
+        </table>
+      </div>
+      <div id="vazioAprovar" class="empty hide">Nenhuma solicitação pendente para você.</div>
+    </div>
+    <h2 id="tituloMinhas" class="hide" style="font-size:16px;margin:0 0 8px">Minhas solicitações</h2>
+    <div class="card">
+      <div class="tools">
+        <input type="text" id="busca" placeholder="Buscar por fornecedor, ID ou categoria">
+        <select id="filtroStatus"><option value="">Todos os status</option></select>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>ID</th><th>Data</th><th>Fornecedor</th><th>Status</th><th>BU</th><th>Categoria</th><th style="text-align:right">Valor</th><th>Tipo Pagto</th><th>Forma de Pagto</th><th>1º Pagto</th><th>Aprovador</th></tr></thead>
+          <tbody id="corpo"></tbody>
+        </table>
+      </div>
+      <div id="vazio" class="empty hide">Nenhuma solicitação encontrada.</div>
+      <div id="m3" class="msg"></div>
+    </div>
+    <div class="note">Por segurança, esta página não exibe CNPJ/CPF nem anexos. A chave PIX / dados bancários aparecem só nas suas solicitações. A sessão expira em 2 horas.</div>
+  </div>
+</div>
+
+<script>
+// ---- Endpoints (Make) ----
+const URL_PEDIR_CODIGO = 'https://hook.us2.make.com/4grwu9mqhcvswo9gxs3ew2je72pg88pw';
+const URL_VALIDAR      = 'https://hook.us2.make.com/lb38iqr9soitw1gdgh7j96mialufz1f9';
+const URL_MINHAS       = 'https://hook.us2.make.com/4urttugyoso6elt1z9u0ugo98g8hm3jd';
+
+const $ = id => document.getElementById(id);
+let itens = [];
+let emailAtual = '';
+
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function msg(id, texto, tipo) { const e = $(id); e.textContent = texto || ''; e.className = 'msg' + (tipo ? ' ' + tipo : ''); }
+function mostrar(passo) { ['p1','p2','p3'].forEach(p => $(p).classList.toggle('hide', p !== passo)); }
+
+async function post(url, corpo) {
+  const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corpo) });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+
+$('btnCodigo').onclick = async () => {
+  const email = $('email').value.trim().toLowerCase();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { msg('m1', 'Informe um e-mail válido.', 'err'); return; }
+  $('btnCodigo').disabled = true; msg('m1', 'Enviando...');
+  try {
+    const d = await post(URL_PEDIR_CODIGO, { email });
+    emailAtual = email;
+    $('emailMostrado').textContent = email;
+    msg('m1', '');
+    msg('m2', d.mensagem || 'Se o e-mail estiver cadastrado, enviamos um código.', 'ok');
+    mostrar('p2'); $('codigo').value = ''; $('codigo').focus();
+  } catch (e) { msg('m1', 'Não foi possível enviar agora. Tente novamente.', 'err'); }
+  $('btnCodigo').disabled = false;
+};
+
+$('btnVoltar').onclick = () => { mostrar('p1'); msg('m2', ''); };
+
+$('btnValidar').onclick = async () => {
+  const codigo = $('codigo').value.replace(/\D/g, '');
+  if (codigo.length !== 6) { msg('m2', 'Digite os 6 dígitos do código.', 'err'); return; }
+  $('btnValidar').disabled = true; msg('m2', 'Verificando...');
+  try {
+    const d = await post(URL_VALIDAR, { email: emailAtual, codigo });
+    if (!d.ok || !d.token) { msg('m2', d.mensagem || 'Código inválido ou expirado.', 'err'); }
+    else { sessionStorage.setItem('ca_token', d.token); msg('m2', ''); await carregar(); }
+  } catch (e) { msg('m2', 'Não foi possível validar agora. Tente novamente.', 'err'); }
+  $('btnValidar').disabled = false;
+};
+
+async function carregar() {
+  const token = sessionStorage.getItem('ca_token');
+  if (!token) { mostrar('p1'); return; }
+  msg('m3', 'Carregando...');
+  try {
+    const d = await post(URL_MINHAS, { token });
+    if (!d.ok) { sessionStorage.removeItem('ca_token'); mostrar('p1'); msg('m1', d.mensagem || 'Sessão expirada. Entre novamente.', 'err'); return; }
+    itens = (Array.isArray(d.itens) ? d.itens : []).filter(i => i && String(i.id || '').trim());
+    $('quem').textContent = d.email || '';
+    const ehAprov = d.eh_aprovador === true || d.eh_aprovador === 'true';
+    // O Make devolve 1 item vazio quando não há linhas: descarta itens sem ID
+    const pend = (Array.isArray(d.para_aprovar) ? d.para_aprovar : []).filter(i => i && String(i.id || '').trim());
+    $('blocoAprovar').classList.toggle('hide', !ehAprov);
+    $('tituloAprovar').classList.toggle('hide', !ehAprov);
+    $('tituloMinhas').classList.toggle('hide', !ehAprov);
+    $('qtdAprovar').textContent = pend.length;
+    $('vazioAprovar').classList.toggle('hide', pend.length > 0);
+    $('corpoAprovar').innerHTML = pend.map(i =>
+      '<tr><td>' + esc(i.id) + '</td><td>' + esc(fmtData(i.data)) + '</td><td>' + esc(i.requerente) + '</td><td>' + esc(i.fornecedor) + '</td>' +
+      '<td>' + esc(i.bu) + '</td><td>' + esc(i.categoria) + '</td><td class="num">' + esc(i.valor) + '</td><td>' + esc(i.tipo_pagamento) + '</td>' +
+      '<td>' + formaChave(i) + '</td><td>' + esc(fmtData(i.venc1)) + '</td>' +
+      '<td>' + esc(i.descricao) + '</td></tr>').join('');
+    montarFiltro(); desenhar(); msg('m3', ''); mostrar('p3');
+  } catch (e) { mostrar('p3'); msg('m3', 'Não foi possível carregar suas solicitações. Tente novamente.', 'err'); }
+}
+
+function montarFiltro() {
+  const sel = $('filtroStatus'); const atual = sel.value;
+  const st = [...new Set(itens.map(i => String(i.status || '').trim()).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">Todos os status</option>' + st.map(s => '<option>' + esc(s) + '</option>').join('');
+  sel.value = st.includes(atual) ? atual : '';
+}
+
+// Data no formato dd/mm/aa, sem hora (aceita dd/mm/aaaa [hh:mm:ss] e aaaa-mm-dd [hh:mm:ss])
+function fmtData(v) {
+  const s = String(v == null ? '' : v).trim();
+  if (!s) return '';
+  let m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+  if (m) return m[1].padStart(2, '0') + '/' + m[2].padStart(2, '0') + '/' + m[3].slice(-2);
+  m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) return m[3].padStart(2, '0') + '/' + m[2].padStart(2, '0') + '/' + m[1].slice(-2);
+  return s;
+}
+
+// Forma de pagamento + chave/dados bancários (quando houver)
+function formaChave(i) {
+  const f = esc(i.forma_pagto || '');
+  const c = String(i.chave || '').trim();
+  return f + (c ? '<div class="small">' + esc(c) + '</div>' : '');
+}
+
+function classeStatus(s) {
+  s = String(s || '').toLowerCase();
+  if (s.startsWith('aprov')) return 'aprovado';
+  if (s.startsWith('rejeit') || s.startsWith('reprov')) return 'rejeitado';
+  if (s.startsWith('pend')) return 'pendente';
+  return '';
+}
+
+function desenhar() {
+  const q = $('busca').value.trim().toLowerCase();
+  const fs = $('filtroStatus').value;
+  const lista = itens.filter(i =>
+    (!fs || String(i.status || '').trim() === fs) &&
+    (!q || [i.id, i.fornecedor, i.categoria, i.bu].join(' ').toLowerCase().includes(q)));
+  $('corpo').innerHTML = lista.map(i => {
+    const motivo = i.motivo_rejeicao ? '<div class="small">Motivo: ' + esc(i.motivo_rejeicao) + '</div>' : '';
+    const dataAprov = i.data_aprovacao ? '<div class="small">em ' + esc(fmtData(i.data_aprovacao)) + '</div>' : '';
+    return '<tr><td>' + esc(i.id) + '</td><td>' + esc(fmtData(i.data)) + '</td><td>' + esc(i.fornecedor) + '</td>' +
+      '<td><span class="badge ' + classeStatus(i.status) + '">' + esc(i.status) + '</span>' + motivo + '</td>' +
+      '<td>' + esc(i.bu) + '</td><td>' + esc(i.categoria) + '</td><td class="num">' + esc(i.valor) + '</td>' +
+      '<td>' + esc(i.tipo_pagamento) + '</td><td>' + formaChave(i) + '</td><td>' + esc(fmtData(i.venc1)) + '</td>' +
+      '<td>' + esc(i.aprovador) + dataAprov + '</td></tr>';
+  }).join('');
+  $('vazio').classList.toggle('hide', lista.length > 0);
+}
+
+$('busca').oninput = desenhar;
+$('filtroStatus').onchange = desenhar;
+$('btnAtualizar').onclick = carregar;
+$('btnSair').onclick = () => { sessionStorage.removeItem('ca_token'); itens = []; $('corpo').innerHTML = ''; mostrar('p1'); msg('m1', 'Você saiu.'); };
+$('email').addEventListener('keydown', e => { if (e.key === 'Enter') $('btnCodigo').click(); });
+$('codigo').addEventListener('keydown', e => { if (e.key === 'Enter') $('btnValidar').click(); });
+
+if (sessionStorage.getItem('ca_token')) carregar();
+</script>
+</body>
+</html>
