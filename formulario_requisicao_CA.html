@@ -770,10 +770,9 @@ function atualizarOpcoesFormaPagto(tipo) {
 }
 
 function atualizarLinhaFormaPagto(tipo) {
-  const ehReceita = tipo === 'Receita';
   document.getElementById('row-forma-pagto').style.display = 'table-row';
   atualizarOpcoesFormaPagto(tipo);
-  document.getElementById('forma-req').style.display = ehReceita ? 'none' : '';
+  document.getElementById('forma-req').style.display = '';
   onFormaPagtoChange();
 }
 
@@ -1418,7 +1417,7 @@ async function validar() {
   req('Valor_Bruto', 'Valor Bruto');
   req('Tipo_Pagamento', 'Tipo de Parcelamento');
   req('Data_Vencimento', 'Data 1º Vencimento');
-  if (document.getElementById('Tipo_Despesa').value === 'Despesa') req('Forma_Pagto', 'Forma de Pagto');
+  if (['Despesa', 'Receita'].includes(document.getElementById('Tipo_Despesa').value)) req('Forma_Pagto', 'Forma de Pagto');
     if (document.getElementById('Forma_Pagto').value === 'PIX') req('Chave_PIX', 'Chave PIX');
     if (document.getElementById('Forma_Pagto').value === 'Depósito Banco') {
       const limpo = id => { const el = document.getElementById(id); el.value = el.value.replace(/\s+/g, ''); return el.value; };
