@@ -744,13 +744,12 @@ function atualizarLinhaNFCartao(tipo) {
 }
 
 // ══ FORMA DE PAGTO / CHAVE PIX ═══════════════════════════════
-// Linha "Forma de Pagto" só aparece para Categoria do tipo Despesa; "Chave PIX" (na mesma linha,
+// Linha "Forma de Pagto" aparece para Despesa e Receita; "Chave PIX" (na mesma linha,
 // à direita) só quando Forma de Pagto = PIX. Ao ocultar, os campos são limpos.
 function onFormaPagtoChange() {
-  const ehReceita = document.getElementById('Tipo_Despesa').value === 'Receita';
   const ehPix = document.getElementById('Forma_Pagto').value === 'PIX';
-  const ehDeposito = !ehReceita && document.getElementById('Forma_Pagto').value === 'Depósito Banco';
-  const mostrarPix = (!ehReceita && ehPix) ? 'table-cell' : 'none';
+  const ehDeposito = document.getElementById('Forma_Pagto').value === 'Depósito Banco';
+  const mostrarPix = ehPix ? 'table-cell' : 'none';
   document.getElementById('pix-lbl').style.display = mostrarPix;
   document.getElementById('pix-val').style.display = mostrarPix;
   if (!ehPix) document.getElementById('Chave_PIX').value = '';
@@ -760,11 +759,11 @@ function onFormaPagtoChange() {
   }
 }
 
-// Opções de Forma de Pagto por tipo: Despesa -> Boleto/Cartão Crédito/PIX/Depósito Banco; Receita -> só Hotmart
-// (usada apenas para emissão de NF; opcional). Valor atual é preservado só se ainda válido para o tipo.
+// Opções de Forma de Pagto por tipo: Despesa -> Boleto/Cartão Crédito/PIX/Depósito Banco; Receita -> as mesmas + Hotmart (por último)
+// (Receita: opcional; Hotmart exclusiva de Receita). Valor atual é preservado só se ainda válido para o tipo.
 function atualizarOpcoesFormaPagto(tipo) {
   const sel = document.getElementById('Forma_Pagto');
-  const validas = (tipo === 'Receita') ? ['Hotmart'] : ['Boleto', 'Cartão Crédito', 'PIX', 'Depósito Banco'];
+  const validas = (tipo === 'Receita') ? ['Boleto', 'Cartão Crédito', 'PIX', 'Depósito Banco', 'Hotmart'] : ['Boleto', 'Cartão Crédito', 'PIX', 'Depósito Banco'];
   const atual = sel.value;
   sel.innerHTML = '<option value="">— selecione —</option>' + validas.map(v => '<option value="' + v + '">' + v + '</option>').join('');
   sel.value = validas.indexOf(atual) >= 0 ? atual : '';
@@ -775,7 +774,6 @@ function atualizarLinhaFormaPagto(tipo) {
   document.getElementById('row-forma-pagto').style.display = 'table-row';
   atualizarOpcoesFormaPagto(tipo);
   document.getElementById('forma-req').style.display = ehReceita ? 'none' : '';
-  if (ehReceita) document.getElementById('Chave_PIX').value = '';
   onFormaPagtoChange();
 }
 
@@ -788,7 +786,7 @@ function aplicarFormaPagtoFornecedor(d) {
     const n = String(d.forma_pagto || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     forma = n === 'boleto' ? 'Boleto' : (n === 'pix' ? 'PIX' : ((n === 'cartao credito' || n === 'cartao de credito') ? 'Cartão Crédito' : (n === 'deposito banco' ? 'Depósito Banco' : (n === 'hotmart' ? 'Hotmart' : ''))));
   }
-  if (document.getElementById('Tipo_Despesa').value === 'Receita') { if (forma !== 'Hotmart') forma = ''; } else if (forma === 'Hotmart') { forma = ''; }
+  if (forma === 'Hotmart' && document.getElementById('Tipo_Despesa').value !== 'Receita') forma = '';
   document.getElementById('Forma_Pagto').value = forma;
   onFormaPagtoChange();
   const chaveFornecedor = String((d && d.chave_pix) || '').trim();
@@ -1420,8 +1418,7 @@ async function validar() {
   req('Valor_Bruto', 'Valor Bruto');
   req('Tipo_Pagamento', 'Tipo de Parcelamento');
   req('Data_Vencimento', 'Data 1º Vencimento');
-  if (document.getElementById('Tipo_Despesa').value === 'Despesa') {
-    req('Forma_Pagto', 'Forma de Pagto');
+  if (document.getElementById('Tipo_Despesa').value === 'Despesa') req('Forma_Pagto', 'Forma de Pagto');
     if (document.getElementById('Forma_Pagto').value === 'PIX') req('Chave_PIX', 'Chave PIX');
     if (document.getElementById('Forma_Pagto').value === 'Depósito Banco') {
       const limpo = id => { const el = document.getElementById(id); el.value = el.value.replace(/\s+/g, ''); return el.value; };
@@ -1429,7 +1426,6 @@ async function validar() {
       if (!/^\d+$/.test(limpo('Dep_Agencia'))) erros.push('Agência obrigatória — informe somente dígitos');
       if (!/^\d+-[0-9Xx]$/.test(limpo('Dep_Conta'))) erros.push('Conta obrigatória com dígito — formato 12345-6');
     }
-  }
 
   // ── Grafia brasileira nos campos numéricos (Valor Bruto + 7 impostos) ──
   // Bloqueia o envio se algum valor preenchido não estiver em grafia brasileira válida
@@ -1688,9 +1684,9 @@ function coletarDados() {
     Texto_Botao_Rejeitar: isEmissaoNFAtiva() ? '❌ Solicitar mais informação' : '❌ REJEITAR',
     Is_Emissao_NF_Ativa: encodeURIComponent(isEmissaoNFAtiva() ? 'true' : 'false'),
     Descricao:        g('Descricao'),
-    Forma_Pagto:      (g('Tipo_Despesa') === 'Despesa') ? g('Forma_Pagto') : ((g('Tipo_Despesa') === 'Receita' && g('Forma_Pagto') === 'Hotmart') ? 'Hotmart' : ''),
-    Chave_PIX:        (g('Tipo_Despesa') === 'Despesa' && g('Forma_Pagto') === 'PIX') ? g('Chave_PIX').trim()
-                    : ((g('Tipo_Despesa') === 'Despesa' && g('Forma_Pagto') === 'Depósito Banco')
+    Forma_Pagto:      (g('Tipo_Despesa') === 'Despesa') ? g('Forma_Pagto') : ((g('Tipo_Despesa') === 'Receita' && ['Boleto', 'Cartão Crédito', 'PIX', 'Depósito Banco', 'Hotmart'].indexOf(g('Forma_Pagto')) >= 0) ? g('Forma_Pagto') : ''),
+    Chave_PIX:        ((g('Tipo_Despesa') === 'Despesa' || g('Tipo_Despesa') === 'Receita') && g('Forma_Pagto') === 'PIX') ? g('Chave_PIX').trim()
+                    : (((g('Tipo_Despesa') === 'Despesa' || g('Tipo_Despesa') === 'Receita') && g('Forma_Pagto') === 'Depósito Banco')
                         ? [g('Dep_Banco'), g('Dep_Agencia'), g('Dep_Conta')].map(s => String(s).replace(/\s+/g, '')).join('/') : ''),
     Data_Competencia: g('Data_Competencia'),
     // Valor_Bruto enviado à REQUICOES é sempre o valor bruto TOTAL do pedido (não divide mais por
